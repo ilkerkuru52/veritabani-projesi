@@ -1,0 +1,2109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>YetkiMatrisiDB — Kurumsal Doküman Sistemi</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090E;--s1:#0D1117;--s2:#161B24;--s3:#1C2333;--s4:#222A3C;
+  --bd:#2A3448;--bd2:#364060;
+  --t1:#E4E8F4;--t2:#8B95B2;--t3:#505A78;--t4:#2E3854;
+  --acc:#4F8EF7;--acc2:#2563EB;--acc3:#1D4ED8;
+  --grn:#22C55E;--grn2:#16A34A;
+  --red:#F87171;--red2:#DC2626;
+  --amb:#FBBF24;--amb2:#D97706;
+  --pur:#A78BFA;--pur2:#7C3AED;
+  --cyn:#22D3EE;
+  --f:'Outfit',sans-serif;--m:'JetBrains Mono',monospace;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--f);font-size:14px;min-height:100vh}
+
+/* ══════ GİRİŞ ══════ */
+#login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% -10%,#1e3a8a18 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%,#4f46e518 0%,transparent 60%),
+    var(--bg);
+}
+.login-wrap{width:100%;max-width:460px}
+.login-card{
+  background:var(--s1);border:1px solid var(--bd);border-radius:20px;
+  padding:44px;position:relative;overflow:hidden;
+}
+.login-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,#4f8ef708 0%,transparent 50%);
+  pointer-events:none;
+}
+.login-brand{display:flex;align-items:center;gap:14px;margin-bottom:36px}
+.brand-icon{
+  width:44px;height:44px;border-radius:12px;
+  background:linear-gradient(135deg,var(--acc),var(--pur2));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--m);font-weight:600;font-size:15px;color:#fff;letter-spacing:-.5px;
+}
+.brand-txt h1{font-size:17px;font-weight:600;letter-spacing:-.4px}
+.brand-txt p{font-size:11px;color:var(--t3);font-family:var(--m);margin-top:3px}
+
+.login-h{font-size:24px;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--t3);margin-bottom:32px}
+
+.fl{margin-bottom:18px}
+.fl label{display:block;font-size:11px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.fi{
+  width:100%;padding:11px 14px;
+  background:var(--s2);border:1px solid var(--bd);border-radius:10px;
+  color:var(--t1);font-family:var(--f);font-size:14px;outline:none;transition:border .15s;
+}
+.fi:focus{border-color:var(--acc)}
+.fs{width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:10px;color:var(--t1);font-family:var(--f);font-size:14px;cursor:pointer;outline:none}
+.fs:focus{border-color:var(--acc)}
+.btn-login{
+  width:100%;padding:12px;margin-top:4px;
+  background:var(--acc);border:none;border-radius:10px;
+  color:#fff;font-family:var(--f);font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .15s;letter-spacing:-.2px;
+}
+.btn-login:hover{background:var(--acc2);transform:translateY(-1px)}
+.btn-login:active{transform:translateY(0)}
+
+.quick{margin-top:28px;padding-top:24px;border-top:1px solid var(--bd)}
+.ql{font-size:10px;color:var(--t4);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:500}
+.qg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.qb{
+  padding:8px 4px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;
+  color:var(--t3);font-size:10px;cursor:pointer;text-align:center;
+  transition:all .15s;font-family:var(--f);line-height:1.5;
+}
+.qb:hover{border-color:var(--acc);color:var(--acc);background:var(--s3)}
+.qb span{display:block;font-size:9px;color:var(--t4);margin-top:2px;font-family:var(--m)}
+
+/* ══════ APP ══════ */
+#app{display:none;height:100vh;flex-direction:column}
+#app.on{display:flex}
+
+/* Topbar */
+.topbar{
+  height:54px;background:var(--s1);border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;padding:0 20px;gap:14px;flex-shrink:0;
+  position:relative;z-index:10;
+}
+.topbar-logo{font-family:var(--m);font-size:13px;font-weight:600;color:var(--acc);letter-spacing:-.4px}
+.topbar-div{width:1px;height:18px;background:var(--bd)}
+.topbar-page{font-size:13px;color:var(--t2);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.ta{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.tu{font-size:13px;font-weight:500}
+.tr{font-size:10px;color:var(--t3);font-family:var(--m);margin-top:1px}
+.btn-logout{padding:5px 12px;background:transparent;border:1px solid var(--bd);border-radius:7px;color:var(--t3);font-size:12px;cursor:pointer;font-family:var(--f);transition:all .15s}
+.btn-logout:hover{border-color:var(--red);color:var(--red)}
+
+/* Layout */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+.sb{
+  width:224px;background:var(--s1);border-right:1px solid var(--bd);
+  padding:14px 8px;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;
+}
+.sb-sect{margin-bottom:6px}
+.sb-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--t4);padding:0 10px;margin-bottom:5px;font-weight:500}
+.sb-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:8px;cursor:pointer;color:var(--t3);
+  transition:all .12s;font-size:13px;border:1px solid transparent;font-weight:400;
+}
+.sb-item:hover{background:var(--s2);color:var(--t1)}
+.sb-item.on{background:var(--s3);border-color:var(--bd);color:var(--acc);font-weight:500}
+.sb-ico{width:16px;text-align:center;flex-shrink:0;font-size:13px}
+.sb-tag{margin-left:auto;font-size:9px;padding:1px 6px;border-radius:6px;font-family:var(--m)}
+
+/* Content */
+.main{flex:1;overflow-y:auto;background:var(--bg);padding:24px}
+
+/* Pages */
+.pg{display:none}.pg.on{display:block}
+
+/* Cards */
+.card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.card-h{padding:15px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+.card-title{font-size:14px;font-weight:600;letter-spacing:-.3px}
+.card-sub{font-size:11px;color:var(--t3);margin-left:auto;font-family:var(--m)}
+.card-b{padding:20px}
+
+/* Stats */
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.sc{background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;filter:blur(30px);opacity:.3}
+.sv{font-size:28px;font-weight:700;font-family:var(--m);letter-spacing:-1px}
+.sl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-top:4px}
+.st{font-size:10px;margin-top:6px;font-family:var(--m);color:var(--t3)}
+
+/* Tablo */
+.tw{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:13px}
+table.t th{padding:9px 13px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:500;color:var(--t3);border-bottom:1px solid var(--bd);white-space:nowrap}
+table.t td{padding:9px 13px;border-bottom:1px solid var(--bd);color:var(--t2);vertical-align:middle}
+table.t tr:last-child td{border-bottom:none}
+table.t tr:hover td{background:var(--s2)}
+table.t td.p{color:var(--t1);font-weight:500}
+
+/* Badge */
+.b{display:inline-flex;align-items:center;padding:2px 8px;border-radius:8px;font-size:10px;font-weight:500;font-family:var(--m);white-space:nowrap}
+.b-g{background:#22C55E18;color:var(--grn)}
+.b-r{background:#F8717118;color:var(--red)}
+.b-a{background:#FBBF2418;color:var(--amb)}
+.b-b{background:#4F8EF718;color:var(--acc)}
+.b-p{background:#A78BFA18;color:var(--pur)}
+.b-c{background:#22D3EE18;color:var(--cyn)}
+.b-x{background:#505A7818;color:var(--t3)}
+
+/* Butonlar */
+.btn{padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:var(--f);transition:all .12s;border:none;font-weight:500;letter-spacing:-.1px}
+.btn-s{padding:5px 10px;font-size:11px}
+.btn-acc{background:var(--acc);color:#fff}
+.btn-acc:hover{background:var(--acc2)}
+.btn-out{background:transparent;color:var(--t2);border:1px solid var(--bd)}
+.btn-out:hover{border-color:var(--acc);color:var(--acc)}
+.btn-del{background:transparent;color:var(--red);border:1px solid #F8717128}
+.btn-del:hover{background:#F8717110}
+.btn-grn{background:var(--grn2);color:#fff}
+.btn-grn:hover{background:#15803D}
+.abr{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.srch{padding:7px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-size:12px;font-family:var(--f);outline:none;width:220px}
+.srch:focus{border-color:var(--acc)}
+.sel2{padding:7px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-size:12px;font-family:var(--f);cursor:pointer;outline:none}
+
+/* Modal */
+.mo{display:none;position:fixed;inset:0;background:#00000088;z-index:100;align-items:center;justify-content:center;padding:20px}
+.mo.on{display:flex}
+.md{background:var(--s1);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.md-h{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.md-t{font-size:15px;font-weight:600}
+.md-x{background:none;border:none;color:var(--t2);cursor:pointer;font-size:20px;line-height:1;padding:2px 6px;border-radius:5px}
+.md-x:hover{color:var(--t1);background:var(--s2)}
+.md-b{padding:24px}
+.md-f{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+.fg{margin-bottom:14px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.flb{font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px;display:block}
+.fin{width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-size:13px;font-family:var(--f);outline:none}
+.fin:focus{border-color:var(--acc)}
+.fsl{width:100%;padding:9px 12px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--t1);font-size:13px;font-family:var(--f);cursor:pointer;outline:none}
+
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;z-index:200;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.ti{padding:12px 16px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:10px;min-width:260px;animation:si .25s ease;pointer-events:auto;font-weight:500}
+@keyframes si{from{transform:translateX(110%);opacity:0}to{transform:none;opacity:1}}
+.ti-s{background:var(--grn2);color:#fff}
+.ti-e{background:var(--red2);color:#fff}
+.ti-i{background:var(--acc2);color:#fff}
+.ti-w{background:var(--amb2);color:#fff}
+
+/* Yetki sonucu */
+.ar{padding:14px 16px;border-radius:10px;margin-top:14px;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600}
+.ar-ok{background:#22C55E14;border:1px solid #22C55E40;color:var(--grn)}
+.ar-no{background:#F8717114;border:1px solid #F8717140;color:var(--red)}
+
+/* Log zaman çizelgesi */
+.li{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd)}
+.li:last-child{border-bottom:none}
+.ld{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.la{font-size:13px;font-weight:500;color:var(--t1)}
+.lm{font-size:11px;color:var(--t3);margin-top:2px;font-family:var(--m)}
+
+/* NF kanıt kutuları */
+.nf-box{border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid}
+.nf-ok{background:#22C55E0A;border-color:#22C55E30}
+.nf-er{background:#F871710A;border-color:#F8717130}
+.nf-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+.nf-txt{font-size:12px;color:var(--t2);line-height:1.7;font-family:var(--m)}
+
+/* Gizlilik renkleri */
+.gz-1{color:var(--grn)}.gz-2{color:var(--cyn)}.gz-3{color:var(--amb)}.gz-4{color:var(--red)}.gz-5{color:#F43F5E}
+
+/* Erişim matrisi */
+.mx th,.mx td{padding:7px 10px;border:1px solid var(--bd);font-size:11px;text-align:center}
+.mx th{background:var(--s2);color:var(--t3);font-weight:500;font-family:var(--m)}
+.mx td.rn{text-align:left;background:var(--s2);font-weight:500;color:var(--t1);white-space:nowrap}
+.cv{color:var(--grn);font-size:14px;font-weight:700}
+.cx{color:var(--t4);font-size:12px}
+.ck{color:var(--amb);font-size:12px;font-weight:600}
+
+/* Grid ikili/üçlü */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+
+/* Separator */
+.sep{height:1px;background:var(--bd);margin:16px 0}
+.empty{padding:40px;text-align:center;color:var(--t4);font-size:13px}
+
+/* SQL kod kutusu */
+.sqlbox{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;font-size:11px;color:var(--t2);font-family:var(--m);line-height:1.8;white-space:pre-wrap;overflow-x:auto}
+.sqlbox .kw{color:var(--pur)}.sqlbox .fn{color:var(--acc)}.sqlbox .st{color:var(--grn)}.sqlbox .cm{color:var(--t4)}.sqlbox .nm{color:var(--amb)}
+
+/* Departman ağacı */
+.dept-node{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;transition:background .12s;cursor:default}
+.dept-node:hover{background:var(--s2)}
+
+/* Versiyon zaman çizelgesi */
+.ver-item{display:flex;gap:14px;margin-bottom:16px;position:relative}
+.ver-dot{width:10px;height:10px;border-radius:50%;background:var(--acc);flex-shrink:0;margin-top:4px;z-index:1}
+.ver-line{position:absolute;left:4px;top:14px;bottom:-16px;width:2px;background:var(--bd)}
+.ver-item:last-child .ver-line{display:none}
+
+/* Onay akış adımları */
+.onay-step{display:flex;align-items:center;gap:10px;padding:10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;margin-bottom:8px}
+.onay-no{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ GİRİŞ EKRANI ══════════════════ -->
+<div id="login">
+<div class="login-wrap">
+<div class="login-card">
+  <div class="login-brand">
+    <div class="brand-icon">YM</div>
+    <div class="brand-txt">
+      <h1>YetkiMatrisiDB</h1>
+      <p>Kastamonu Üniversitesi · Bilgisayar Mühendisliği · 2026</p>
+    </div>
+  </div>
+  <div class="login-h">Sisteme Giriş Yap</div>
+  <div class="login-sub">Kurumsal Doküman Erişim Yetki ve İz Kaydı Sistemi</div>
+
+  <div class="fl"><label>Kullanıcı Adı</label>
+    <input class="fi" id="lu" value="sysadmin_001" placeholder="kullanici_adi">
+  </div>
+  <div class="fl"><label>Şifre</label>
+    <input class="fi" id="lp" type="password" value="SysAdm2026!" placeholder="••••••••">
+  </div>
+  <div class="fl"><label>Rol Seçin</label>
+    <select class="fs" id="lr">
+      <option value="SYS_ADMIN">Sistem Yöneticisi — Seviye 10</option>
+      <option value="SEC_ADMIN">Güvenlik Yöneticisi — Seviye 9</option>
+      <option value="AUDITOR">Denetçi — Seviye 8</option>
+      <option value="DEPT_MGR">Departman Yöneticisi — Seviye 7</option>
+      <option value="PROJ_MGR">Proje Yöneticisi — Seviye 6</option>
+      <option value="SR_EMP">Kıdemli Çalışan — Seviye 5</option>
+      <option value="EMPLOYEE">Çalışan — Seviye 3</option>
+      <option value="GUEST">Misafir Kullanıcı — Seviye 1</option>
+    </select>
+  </div>
+  <button class="btn-login" onclick="girisYap()">Giriş Yap →</button>
+
+  <div class="quick">
+    <div class="ql">Hızlı Giriş — Rol Seç</div>
+    <div class="qg">
+      <div class="qb" onclick="hizliGiris('SYS_ADMIN','sysadmin_001')">Sys Admin<span>Lv.10</span></div>
+      <div class="qb" onclick="hizliGiris('SEC_ADMIN','secmgr_001')">Güv. Yön.<span>Lv.9</span></div>
+      <div class="qb" onclick="hizliGiris('AUDITOR','auditor_001')">Denetçi<span>Lv.8</span></div>
+      <div class="qb" onclick="hizliGiris('DEPT_MGR','ik_mgr_001')">Dept. Yön.<span>Lv.7</span></div>
+      <div class="qb" onclick="hizliGiris('PROJ_MGR','arg_mgr_001')">Proje Yön.<span>Lv.6</span></div>
+      <div class="qb" onclick="hizliGiris('SR_EMP','sr_001')">Kıd. Çalışan<span>Lv.5</span></div>
+      <div class="qb" onclick="hizliGiris('EMPLOYEE','emp_001')">Çalışan<span>Lv.3</span></div>
+      <div class="qb" onclick="hizliGiris('GUEST','guest_001')">Misafir<span>Lv.1</span></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- ══════════════════ UYGULAMA ══════════════════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">YetkiMatrisiDB</div>
+    <div class="topbar-div"></div>
+    <div class="topbar-page" id="tp-page">Dashboard</div>
+    <div class="topbar-right">
+      <div class="ta" id="nav-av"></div>
+      <div>
+        <div class="tu" id="nav-ad"></div>
+        <div class="tr" id="nav-rol"></div>
+      </div>
+      <button class="btn-logout" onclick="cikisYap()">⏻ Çıkış</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sb" id="sb"></aside>
+
+    <main class="main">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="pg on" id="pg-dashboard">
+        <div style="margin-bottom:20px">
+          <h2 style="font-size:22px;font-weight:700;letter-spacing:-.5px" id="d-selam"></h2>
+          <p style="font-size:13px;color:var(--t3);margin-top:5px" id="d-sub"></p>
+        </div>
+        <div class="sg" id="d-stats"></div>
+        <div class="g2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Son Erişim Logları</div><div class="card-sub b b-r" id="log-canli">CANLI</div></div>
+            <div id="d-loglar" style="padding:12px 20px"></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Doküman Durumları</div></div>
+            <div class="card-b" id="d-durumlar"></div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Aktif Onay Akışları</div></div>
+            <div class="card-b" id="d-onaylar"></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Sistem Özeti (S28 UNION ALL)</div></div>
+            <div class="card-b" id="d-ozet"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DOKÜMANLAR ── -->
+      <div class="pg" id="pg-dokumanlar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1;letter-spacing:-.4px">Doküman Yönetimi</h2>
+          <input class="srch" id="dok-srch" placeholder="Başlık / No ara…" oninput="renderDok()">
+          <select class="sel2" id="dok-kat-fil" onchange="renderDok()">
+            <option value="">Tüm Kategoriler</option>
+          </select>
+          <select class="sel2" id="dok-dur-fil" onchange="renderDok()">
+            <option value="">Tüm Durumlar</option>
+            <option>Taslak</option><option>Inceleme</option><option>Onaylandi</option>
+            <option>Yayinlandi</option><option>Arsivlendi</option>
+          </select>
+          <button class="btn btn-acc" id="btn-yeni-dok" onclick="ac('mo-dok')">+ Yeni Doküman</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t" id="dok-tablo">
+              <thead><tr><th>NO</th><th>BAŞLIK</th><th>KATEGORİ</th><th>GİZLİLİK</th><th>DURUM</th><th>OLUŞTURAN</th><th>VERSİYON</th><th>TARİH</th><th>İŞLEM</th></tr></thead>
+              <tbody id="dok-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── VERSİYONLAR ── -->
+      <div class="pg" id="pg-versiyonlar">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Doküman Versiyonları</h2></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Versiyon Listesi</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>DOKÜMAN</th><th>VERSİYON</th><th>DEĞİŞİKLİK</th><th>OLUŞTURAN</th><th>TARİH</th></tr></thead>
+                <tbody id="ver-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Zaman Çizelgesi</div></div>
+            <div class="card-b" id="ver-zaman"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ONAYLAR ── -->
+      <div class="pg" id="pg-onaylar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Onay Akışları</h2>
+          <button class="btn btn-acc" onclick="ac('mo-onay')">+ Yeni Onay Başlat</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>DOKÜMAN</th><th>ONAYCII</th><th>ADIM</th><th>DURUM</th><th>GÖNDERİLME</th><th>ONAY TARİHİ</th><th>YORUM</th><th>İŞLEM</th></tr></thead>
+              <tbody id="onay-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BİLDİRİMLER ── -->
+      <div class="pg" id="pg-bildirimler">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Bildirimler</h2>
+          <button class="btn btn-out btn-s" onclick="tumunuOku()">Tümünü Okundu İşaretle</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>TİP</th><th>BAŞLIK</th><th>GÖNDEREN</th><th>DOKÜMAN</th><th>DURUM</th><th>TARİH</th></tr></thead>
+              <tbody id="bil-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PAYLAŞIMLAR ── -->
+      <div class="pg" id="pg-paylaşimlar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Doküman Paylaşımları</h2>
+          <button class="btn btn-acc" onclick="ac('mo-paylasim')">+ Yeni Paylaşım</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>DOKÜMAN</th><th>PAYLAŞAN</th><th>ALICI</th><th>TİP</th><th>YETKİ</th><th>BİTİŞ</th><th>DURUM</th><th>İŞLEM</th></tr></thead>
+              <tbody id="pay-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KATEGORİLER ── -->
+      <div class="pg" id="pg-kategoriler">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Doküman Kategorileri ve Tipleri</h2></div>
+        <div class="g4" id="kat-grid"></div>
+      </div>
+
+      <!-- ── ETİKETLER ── -->
+      <div class="pg" id="pg-etiketler">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Etiketler (1NF Kanıtı)</h2></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-h"><div class="card-title">1NF — Atomik Etiket Yapısı</div></div>
+          <div class="card-b">
+            <div class="nf-box nf-er">
+              <div class="nf-lbl" style="color:var(--red)">❌ 1NF İhlal Senaryosu</div>
+              <div class="nf-txt">Dokumanlar.Etiketler = "Gizli,ISO,Acil" → tek hücrede çok değer → WHERE Etiketler='ISO' çalışmaz!</div>
+            </div>
+            <div class="nf-box nf-ok">
+              <div class="nf-lbl" style="color:var(--grn)">✓ 1NF Çözüm — DokumanEtiketler N:M Tablosu</div>
+              <div class="nf-txt">Her etiket ayrı satır: (DokumanID=1,EtiketID=1), (DokumanID=1,EtiketID=9) → Atomik yapı ✓</div>
+            </div>
+          </div>
+        </div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Etiket Listesi (15 Adet)</div></div>
+            <div class="card-b" id="etiket-listesi" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Doküman–Etiket İlişkileri</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>DOKÜMAN NO</th><th>ETİKET</th><th>RENK</th><th>EKLEYEN</th></tr></thead>
+                <tbody id="dok-etiket-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KULLANICILAR ── -->
+      <div class="pg" id="pg-kullanicilar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Kullanıcı Yönetimi</h2>
+          <button class="btn btn-acc" onclick="ac('mo-user')">+ Yeni Kullanıcı</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>KULLANICI</th><th>E-POSTA</th><th>DEPARTMAN</th><th>ROL</th><th>UNVAN</th><th>DURUM</th><th>SON GİRİŞ</th><th>İŞLEM</th></tr></thead>
+              <tbody id="usr-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ROLLER ── -->
+      <div class="pg" id="pg-roller">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Roller ve Yetki Matrisi</h2></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-h"><div class="card-title">Yetki Karşılaştırma Matrisi — SQL YetkiMatrisi Tablosu</div></div>
+          <div class="card-b" style="padding:0;overflow-x:auto">
+            <table class="t mx" id="rol-mx" style="min-width:700px"></table>
+          </div>
+        </div>
+        <div class="g4" id="rol-kartlar"></div>
+      </div>
+
+      <!-- ── DEPARTMANLAR ── -->
+      <div class="pg" id="pg-departmanlar">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Departman Hiyerarşisi (CTE Recursive — S30)</h2></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Hiyerarşik Görünüm</div></div>
+            <div class="card-b" id="dept-agac"></div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Departman Listesi</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>KOD</th><th>DEPARTMAN</th><th>ÜST DEPT.</th><th>ÇALIŞAN</th></tr></thead>
+                <tbody id="dept-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ERİŞİM LOGLARI ── -->
+      <div class="pg" id="pg-loglar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Erişim Logları — ErisimLoglari Tablosu</h2>
+          <select class="sel2" onchange="logFiltre(this.value)">
+            <option value="">Tüm İşlemler</option>
+            <option>Goruntuleme</option><option>Indirme</option><option>Duzenleme</option>
+            <option>YetkiReddi</option><option>Paylasma</option><option>Yazdirma</option><option>Kopyalama</option>
+          </select>
+          <select class="sel2" onchange="logFiltreSonuc(this.value)">
+            <option value="">Tüm Sonuçlar</option><option value="1">Başarılı</option><option value="0">Başarısız</option>
+          </select>
+          <button class="btn btn-out btn-s" onclick="testLog()">+ Test Log Ekle</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>LOG ID</th><th>KULLANICI</th><th>DOKÜMAN</th><th>İŞLEM</th><th>IP ADRESİ</th><th>OTURUM</th><th>SONUÇ</th><th>TARİH</th></tr></thead>
+              <tbody id="log-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── İŞLEM GEÇMİŞİ ── -->
+      <div class="pg" id="pg-gecmis">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">İşlem Geçmişi — IslemGecmisi Tablosu</h2></div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>İŞLEM ID</th><th>KULLANICI</th><th>KATEGORİ</th><th>AÇIKLAMA</th><th>ETKİLİ TABLO</th><th>SONUÇ</th><th>TARİH</th></tr></thead>
+              <tbody id="gec-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── KİŞİSEL YETKİ İSTİSNALARI ── -->
+      <div class="pg" id="pg-istisnalar">
+        <div class="abr">
+          <h2 style="font-size:18px;font-weight:700;flex:1">Kişisel Yetki İstisnaları</h2>
+          <button class="btn btn-acc" onclick="ac('mo-istisna')">+ Yeni İstisna</button>
+        </div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>KULLANICI</th><th>İSTİSNA YÖNÜ</th><th>DOKÜMAN/KATEGORİ</th><th>AÇIKLAMA</th><th>YETKİ VEREN</th><th>BAŞLANGIÇ</th><th>BİTİŞ</th><th>DURUM</th></tr></thead>
+              <tbody id="ist-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── YETKİ KONTROLÜ ── -->
+      <div class="pg" id="pg-yetki">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Yetki Kontrolü — S08 CASE WHEN Sorgusu</h2></div>
+        <div class="g2">
+          <div class="card">
+            <div class="card-h"><div class="card-title">Erişim Kararı Sorgula</div></div>
+            <div class="card-b">
+              <div class="fg"><label class="flb">Kullanıcı</label><select class="fsl" id="yk-usr"></select></div>
+              <div class="fg"><label class="flb">Doküman Kategorisi</label>
+                <select class="fsl" id="yk-kat">
+                  <option value="HUK">Hukuki Belgeler (Gizlilik: 4)</option>
+                  <option value="TEK">Teknik Belgeler (Gizlilik: 3)</option>
+                  <option value="IKB">İK ve Personel (Gizlilik: 5)</option>
+                  <option value="MAL">Mali ve Muhasebe (Gizlilik: 4)</option>
+                  <option value="ARG">Ar-Ge ve Patent (Gizlilik: 5)</option>
+                  <option value="YON">Yönetim Kararları (Gizlilik: 3)</option>
+                  <option value="MUS">Müşteri ve CRM (Gizlilik: 3)</option>
+                  <option value="KAL">Kalite Güvence (Gizlilik: 2)</option>
+                </select>
+              </div>
+              <div class="fg"><label class="flb">İşlem Türü</label>
+                <select class="fsl" id="yk-islem">
+                  <option value="ok">Okuma</option><option value="yaz">Yazma</option>
+                  <option value="sil">Silme</option><option value="ind">İndirme</option><option value="pay">Paylaşma</option>
+                </select>
+              </div>
+              <button class="btn btn-acc" style="width:100%" onclick="yetkiKontrol()">Erişim Kararını Sorgula</button>
+              <div id="yk-sonuc"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Çalışan SQL Sorgusu</div></div>
+            <div class="card-b"><div class="sqlbox" id="yk-sql"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ŞÜPHELİ ERİŞİM ── -->
+      <div class="pg" id="pg-suphe">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Şüpheli Erişim Raporu — S18 GROUP BY + HAVING</h2></div>
+        <div class="g2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-h"><div class="card-title">IP Bazlı YetkiReddi Analizi</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>IP ADRESİ</th><th>FARKLI KULLANICI</th><th>TOPLAM RED</th><th>İLK GİRİŞİM</th><th>SON GİRİŞİM</th><th>SÜRE (dk)</th></tr></thead>
+                <tbody id="sup-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Gizlilik–Red Korelasyonu — S33</div></div>
+            <div class="card-b" id="korel-div"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">Mesai Dışı Erişim — S19 DATEPART</div></div>
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>LOG ID</th><th>KULLANICI</th><th>DOKÜMAN</th><th>İŞLEM</th><th>GİZLİLİK</th><th>SAAT</th><th>TARİH</th></tr></thead>
+              <tbody id="mesai-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RAPORLAR ── -->
+      <div class="pg" id="pg-raporlar">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Analitik Raporlar — WINDOW + PIVOT + CTE</h2></div>
+        <div class="g2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-h"><div class="card-title">En Çok Erişilen 20 Doküman — S17 TOP 20</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>SIRA</th><th>DOKÜMAN</th><th>KATEGORİ</th><th>ERİŞİM</th><th>İNDİRME</th></tr></thead>
+                <tbody id="top20-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><div class="card-title">Dept. En Verimli Kullanıcı — S29 RANK()</div></div>
+            <div class="card-b" style="padding:0">
+              <div class="tw"><table class="t">
+                <thead><tr><th>SIRA</th><th>DEPARTMAN</th><th>KULLANICI</th><th>DOKÜMAN SAYISI</th></tr></thead>
+                <tbody id="rank-tbody"></tbody>
+              </table></div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-h"><div class="card-title">Aylık İşlem Pivot — S31 PIVOT FOR IslemTipi IN</div></div>
+          <div class="card-b" style="padding:0;overflow-x:auto">
+            <table class="t" id="pivot-tablo" style="min-width:800px">
+              <thead><tr><th>AY</th><th>Goruntuleme</th><th>Indirme</th><th>Duzenleme</th><th>Paylasma</th><th>YetkiReddi</th><th>Yazdirma</th><th>Kopyalama</th></tr></thead>
+              <tbody id="pivot-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">Kategori Bazlı Dağılım — S22 LEFT JOIN + AVG</div></div>
+          <div class="card-b" id="kat-rapor"></div>
+        </div>
+      </div>
+
+      <!-- ── NORMALİZASYON ── -->
+      <div class="pg" id="pg-norm">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Normalizasyon Kanıtı — 1NF · 2NF · 3NF</h2></div>
+        <div class="g3" style="margin-bottom:16px">
+          <div class="card" style="border-color:#22C55E40">
+            <div class="card-b">
+              <div style="font-size:11px;color:var(--grn);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600">1NF — Birinci Normal Form</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:8px">Atomik değer + Tekil PK</div>
+              <div class="nf-box nf-er"><div class="nf-lbl" style="color:var(--red)">❌ İhlal</div><div class="nf-txt">Etiketler="Gizli,ISO,Acil" tek hücrede → atomik değil</div></div>
+              <div class="nf-box nf-ok"><div class="nf-lbl" style="color:var(--grn)">✓ Çözüm</div><div class="nf-txt">DokumanEtiketler N:M köprü tablosu — her etiket ayrı satırda</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-color:#4F8EF740">
+            <div class="card-b">
+              <div style="font-size:11px;color:var(--acc);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600">2NF — İkinci Normal Form</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:8px">Kısmi bağımlılık yok</div>
+              <div class="nf-box nf-er"><div class="nf-lbl" style="color:var(--red)">❌ İhlal</div><div class="nf-txt">ErisimLoglari(KullaniciAdi,DokumanBaslik) → kısmi bağımlılık</div></div>
+              <div class="nf-box nf-ok"><div class="nf-lbl" style="color:var(--grn)">✓ Çözüm</div><div class="nf-txt">ErisimLoglari sadece FK tutar — KullaniciAdi JOIN ile gelir</div></div>
+            </div>
+          </div>
+          <div class="card" style="border-color:#A78BFA40">
+            <div class="card-b">
+              <div style="font-size:11px;color:var(--pur);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;font-weight:600">3NF — Üçüncü Normal Form</div>
+              <div style="font-size:14px;font-weight:600;margin-bottom:8px">Geçişli bağımlılık yok</div>
+              <div class="nf-box nf-er"><div class="nf-lbl" style="color:var(--red)">❌ İhlal</div><div class="nf-txt">Dokumanlar(TipAdi,KategoriAdi) → DokID→TipID→TipAdi zinciri</div></div>
+              <div class="nf-box nf-ok"><div class="nf-lbl" style="color:var(--grn)">✓ Çözüm</div><div class="nf-txt">Dokumanlar→DokumanTipleri→DokumanKategorileri ayrı tablolar</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-h"><div class="card-title">18 Tablo NF Uyum Matrisi (§2-D Sorgusu)</div></div>
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>#</th><th>TABLO</th><th>HEDEF KAYIT</th><th>1NF</th><th>2NF</th><th>3NF</th><th>GENEL DURUM</th><th>NF KANITI</th></tr></thead>
+              <tbody id="nf-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SİSTEM AYARLARI ── -->
+      <div class="pg" id="pg-ayarlar">
+        <div class="abr"><h2 style="font-size:18px;font-weight:700;flex:1">Sistem Ayarları — SistemAyarlari Tablosu</h2></div>
+        <div class="card">
+          <div class="card-b" style="padding:0">
+            <div class="tw"><table class="t">
+              <thead><tr><th>ANAHTAR</th><th>DEĞER</th><th>TİP</th><th>AÇIKLAMA</th><th>İŞLEM</th></tr></thead>
+              <tbody id="ay-tbody"></tbody>
+            </table></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ══════ MODALLER ══════ -->
+<!-- Doküman -->
+<div class="mo" id="mo-dok">
+  <div class="md">
+    <div class="md-h"><div class="md-t">Yeni Doküman Oluştur</div><button class="md-x" onclick="kapat('mo-dok')">×</button></div>
+    <div class="md-b">
+      <div class="fg2">
+        <div class="fg"><label class="flb">Başlık</label><input class="fin" id="m-bas" placeholder="Doküman başlığı"></div>
+        <div class="fg"><label class="flb">Doküman No</label><input class="fin" id="m-no" placeholder="DOC-2026-XXXXX"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">Kategori</label>
+          <select class="fsl" id="m-kat">
+            <option value="HUK">Hukuki Belgeler</option><option value="TEK">Teknik Belgeler</option>
+            <option value="IKB">İK ve Personel</option><option value="MAL">Mali ve Muhasebe</option>
+            <option value="ARG">Ar-Ge ve Patent</option><option value="YON">Yönetim Kararları</option>
+            <option value="MUS">Müşteri ve CRM</option><option value="KAL">Kalite Güvence</option>
+          </select>
+        </div>
+        <div class="fg"><label class="flb">Gizlilik Seviyesi</label>
+          <select class="fsl" id="m-giz">
+            <option value="1">1 — Genel</option><option value="2">2 — Dahili</option>
+            <option value="3">3 — Hassas</option><option value="4">4 — Gizli</option><option value="5">5 — Çok Gizli</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">Durum</label>
+          <select class="fsl" id="m-dur">
+            <option>Taslak</option><option>Inceleme</option><option>Onaylandi</option><option>Yayinlandi</option>
+          </select>
+        </div>
+        <div class="fg"><label class="flb">Etiket</label>
+          <select class="fsl" id="m-etk">
+            <option value="1">Gizli</option><option value="2">Kritik</option><option value="3">Acil</option>
+            <option value="9">ISO</option><option value="10">KVKK</option><option value="14">Son Versiyon</option><option value="15">Taslak</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="flb">Kısa Açıklama</label><textarea class="fin" id="m-ac" rows="3" style="resize:vertical"></textarea></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-out" onclick="kapat('mo-dok')">İptal</button>
+      <button class="btn btn-acc" onclick="dokKaydet()">Kaydet & Logla</button>
+    </div>
+  </div>
+</div>
+
+<!-- Kullanıcı -->
+<div class="mo" id="mo-user">
+  <div class="md">
+    <div class="md-h"><div class="md-t">Yeni Kullanıcı Ekle</div><button class="md-x" onclick="kapat('mo-user')">×</button></div>
+    <div class="md-b">
+      <div class="fg2">
+        <div class="fg"><label class="flb">Ad</label><input class="fin" id="u-ad" placeholder="Ad"></div>
+        <div class="fg"><label class="flb">Soyad</label><input class="fin" id="u-sy" placeholder="Soyad"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">Kullanıcı Adı</label><input class="fin" id="u-kd" placeholder="kullanici.adi"></div>
+        <div class="fg"><label class="flb">E-posta</label><input class="fin" id="u-em" placeholder="mail@sirket.com.tr"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">Departman</label><select class="fsl" id="u-dp"></select></div>
+        <div class="fg"><label class="flb">Rol</label>
+          <select class="fsl" id="u-rl">
+            <option value="SYS_ADMIN">Sistem Yöneticisi</option><option value="SEC_ADMIN">Güvenlik Yöneticisi</option>
+            <option value="AUDITOR">Denetçi</option><option value="DEPT_MGR">Departman Yöneticisi</option>
+            <option value="PROJ_MGR">Proje Yöneticisi</option><option value="SR_EMP">Kıdemli Çalışan</option>
+            <option value="EMPLOYEE" selected>Çalışan</option><option value="GUEST">Misafir</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="flb">Unvan</label><input class="fin" id="u-uv" placeholder="Uzman, Mühendis vb."></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-out" onclick="kapat('mo-user')">İptal</button>
+      <button class="btn btn-acc" onclick="usrKaydet()">Kullanıcı Ekle</button>
+    </div>
+  </div>
+</div>
+
+<!-- Onay -->
+<div class="mo" id="mo-onay">
+  <div class="md">
+    <div class="md-h"><div class="md-t">Onay Akışı Başlat</div><button class="md-x" onclick="kapat('mo-onay')">×</button></div>
+    <div class="md-b">
+      <div class="fg"><label class="flb">Doküman</label><select class="fsl" id="o-dok"></select></div>
+      <div class="fg"><label class="flb">Onaycı</label><select class="fsl" id="o-ony"></select></div>
+      <div class="fg"><label class="flb">Onay Adımı</label>
+        <select class="fsl" id="o-adm"><option value="1">1. Adım</option><option value="2">2. Adım</option><option value="3">3. Adım</option></select>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-out" onclick="kapat('mo-onay')">İptal</button>
+      <button class="btn btn-acc" onclick="onayKaydet()">Akışı Başlat</button>
+    </div>
+  </div>
+</div>
+
+<!-- Paylaşım -->
+<div class="mo" id="mo-paylasim">
+  <div class="md">
+    <div class="md-h"><div class="md-t">Doküman Paylaş</div><button class="md-x" onclick="kapat('mo-paylasim')">×</button></div>
+    <div class="md-b">
+      <div class="fg"><label class="flb">Doküman</label><select class="fsl" id="py-dok"></select></div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">Paylaşım Tipi</label>
+          <select class="fsl" id="py-tip"><option>Dahili</option><option>Harici</option><option>Genel</option></select>
+        </div>
+        <div class="fg"><label class="flb">Yetki Tipi</label>
+          <select class="fsl" id="py-ytk"><option>Okuma</option><option>Duzenleme</option><option>TamYetki</option></select>
+        </div>
+      </div>
+      <div class="fg"><label class="flb">Alıcı E-posta (Harici)</label><input class="fin" id="py-em" placeholder="alici@harici.com"></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-out" onclick="kapat('mo-paylasim')">İptal</button>
+      <button class="btn btn-acc" onclick="paylaşimKaydet()">Paylaş & Logla</button>
+    </div>
+  </div>
+</div>
+
+<!-- İstisna -->
+<div class="mo" id="mo-istisna">
+  <div class="md">
+    <div class="md-h"><div class="md-t">Kişisel Yetki İstisnası Ekle</div><button class="md-x" onclick="kapat('mo-istisna')">×</button></div>
+    <div class="md-b">
+      <div class="fg"><label class="flb">Kullanıcı</label><select class="fsl" id="is-usr"></select></div>
+      <div class="fg2">
+        <div class="fg"><label class="flb">İstisna Yönü</label>
+          <select class="fsl" id="is-yon"><option>Izin</option><option>Yasak</option></select>
+        </div>
+        <div class="fg"><label class="flb">Kategori</label>
+          <select class="fsl" id="is-kat">
+            <option value="HUK">Hukuki</option><option value="TEK">Teknik</option>
+            <option value="IKB">İK</option><option value="MAL">Mali</option>
+            <option value="ARG">Ar-Ge</option><option value="YON">Yönetim</option>
+            <option value="MUS">Müşteri</option><option value="KAL">Kalite</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="flb">Açıklama</label><input class="fin" id="is-ac" placeholder="İstisna gerekçesi"></div>
+    </div>
+    <div class="md-f">
+      <button class="btn btn-out" onclick="kapat('mo-istisna')">İptal</button>
+      <button class="btn btn-acc" onclick="istisnaKaydet()">İstisna Ekle</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// VERİ KATMANI — SQL tablolarını temsil eder
+// ══════════════════════════════════════════════════════════════════
+const RC={10:'#7C3AED',9:'#4338CA',8:'#0F766E',7:'#B45309',6:'#9A3412',5:'#1D4ED8',3:'#0369A1',1:'#374151'};
+const GR=g=>g===5?'#F43F5E':g===4?'#F87171':g===3?'#FBBF24':g===2?'#22D3EE':'#22C55E';
+const GA=g=>['','Genel','Dahili','Hassas','Gizli','Çok Gizli'][g];
+
+const DB={
+  roller:[
+    {id:1,kod:'SYS_ADMIN',ad:'Sistem Yöneticisi',sev:10,ok:1,yaz:1,sil:1,ind:1,pay:1,gizMax:5,katlar:['HUK','TEK','IKB','MAL','ARG','YON','MUS','KAL'],ac:'Tam sistem erişimi ve konfigürasyon'},
+    {id:2,kod:'SEC_ADMIN',ad:'Güvenlik Yöneticisi',sev:9,ok:1,yaz:1,sil:0,ind:1,pay:1,gizMax:5,katlar:['HUK','TEK','IKB','MAL','ARG','YON','MUS','KAL'],ac:'Yetki matrisi ve güvenlik politikaları'},
+    {id:8,kod:'AUDITOR',ad:'Denetçi',sev:8,ok:1,yaz:0,sil:0,ind:1,pay:0,gizMax:5,katlar:['HUK','TEK','IKB','MAL','ARG','YON','MUS','KAL'],ac:'Tüm belge ve logları okuma'},
+    {id:3,kod:'DEPT_MGR',ad:'Departman Yöneticisi',sev:7,ok:1,yaz:1,sil:1,ind:1,pay:1,gizMax:4,katlar:['HUK','TEK','IKB','MAL','ARG','YON','MUS','KAL'],ac:'Kendi departmanına tam erişim'},
+    {id:4,kod:'PROJ_MGR',ad:'Proje Yöneticisi',sev:6,ok:1,yaz:1,sil:0,ind:1,pay:1,gizMax:3,katlar:['HUK','TEK','ARG','YON','MUS','KAL'],ac:'Atandığı projelere tam erişim'},
+    {id:5,kod:'SR_EMP',ad:'Kıdemli Çalışan',sev:5,ok:1,yaz:0,sil:0,ind:1,pay:0,gizMax:2,katlar:['TEK','YON','MUS','KAL'],ac:'Okuma ve yorum ekleme yetkisi'},
+    {id:6,kod:'EMPLOYEE',ad:'Çalışan',sev:3,ok:1,yaz:0,sil:0,ind:0,pay:0,gizMax:1,katlar:['YON','KAL'],ac:'Sadece yetkili belgelere okuma'},
+    {id:7,kod:'GUEST',ad:'Misafir Kullanıcı',sev:1,ok:1,yaz:0,sil:0,ind:0,pay:0,gizMax:1,katlar:['KAL'],ac:'Yalnızca genel belgelere erişim'},
+  ],
+  kategoriler:[
+    {kod:'HUK',ad:'Hukuki Belgeler',giz:4,renk:'#F87171',ac:'Sözleşme, protokol, vekaletname',tipler:['İş Sözleşmesi','Tedarikçi Sözleşmesi','Gizlilik Sözleşmesi']},
+    {kod:'TEK',ad:'Teknik Belgeler',giz:3,renk:'#FB923C',ac:'Şartname, tasarım, mimari',tipler:['Teknik Şartname','Tasarım Belgesi','Sistem Mimarisi']},
+    {kod:'IKB',ad:'İK ve Personel',giz:5,renk:'#A78BFA',ac:'Özlük, performans, disiplin, maaş',tipler:['Özlük Dosyası','Performans Değerlendirme','Disiplin Tutanağı']},
+    {kod:'MAL',ad:'Mali ve Muhasebe',giz:4,renk:'#F472B6',ac:'Bütçe, bilanço, fatura',tipler:['Yıllık Bütçe','Fatura','Mali Rapor']},
+    {kod:'ARG',ad:'Ar-Ge ve Patent',giz:5,renk:'#F43F5E',ac:'Fikri mülkiyet, patent',tipler:['Patent Başvurusu','Ar-Ge Raporu','Ticari Sır Belgesi']},
+    {kod:'YON',ad:'Yönetim Kararları',giz:3,renk:'#818CF8',ac:'YK kararları, direktifler',tipler:['YK Kararı','Yönetmelik','Direktif']},
+    {kod:'MUS',ad:'Müşteri ve CRM',giz:3,renk:'#22D3EE',ac:'Müşteri sözleşmesi, teklif',tipler:['Müşteri Sözleşmesi','Teklif Belgesi','Müşteri Şikayeti']},
+    {kod:'KAL',ad:'Kalite Güvence',giz:2,renk:'#4ADE80',ac:'ISO, test raporu, prosedür',tipler:['ISO Belgesi','Test Raporu','Kalite Prosedürü']},
+  ],
+  departmanlar:[
+    {id:1,kod:'YK',ad:'Yönetim Kurulu',ust:null,ac:'Üst yönetim birimi'},
+    {id:2,kod:'GM',ad:'Genel Müdürlük',ust:null,ac:'Genel müdür ofisi'},
+    {id:3,kod:'IK',ad:'İnsan Kaynakları',ust:2,ac:'Personel ve işe alım'},
+    {id:4,kod:'MF',ad:'Muhasebe ve Finans',ust:2,ac:'Mali işlemler'},
+    {id:5,kod:'BT',ad:'Bilgi Teknolojileri',ust:2,ac:'Sistem ve altyapı'},
+    {id:6,kod:'HM',ad:'Hukuk Müşavirliği',ust:2,ac:'Hukuki danışmanlık'},
+    {id:7,kod:'ARG',ad:'Araştırma ve Geliştirme',ust:2,ac:'Ürün geliştirme'},
+    {id:8,kod:'URE',ad:'Üretim',ust:2,ac:'Üretim operasyonları'},
+    {id:9,kod:'SP',ad:'Satış ve Pazarlama',ust:2,ac:'Satış faaliyetleri'},
+    {id:10,kod:'MH',ad:'Müşteri Hizmetleri',ust:9,ac:'Müşteri destek'},
+    {id:11,kod:'TZ',ad:'Tedarik Zinciri',ust:2,ac:'Satın alma ve lojistik'},
+    {id:12,kod:'KG',ad:'Kalite Güvence',ust:2,ac:'Kalite kontrol'},
+    {id:13,kod:'ID',ad:'İç Denetim',ust:1,ac:'Bağımsız iç denetim'},
+    {id:14,kod:'PYO',ad:'Proje Yönetim Ofisi',ust:2,ac:'PMO merkezi'},
+    {id:15,kod:'ILT',ad:'İletişim ve PR',ust:2,ac:'Basın ve iletişim'},
+    {id:16,kod:'SY',ad:'Süreç Yönetimi',ust:2,ac:'İş süreçleri'},
+    {id:17,kod:'VA',ad:'Veri Analitik',ust:5,ac:'Veri bilimi'},
+    {id:18,kod:'SG',ad:'Siber Güvenlik',ust:5,ac:'Güvenlik operasyonları'},
+    {id:19,kod:'UR',ad:'Uyum ve Risk',ust:2,ac:'Regülasyon uyumu'},
+    {id:20,kod:'EG',ad:'Eğitim ve Gelişim',ust:3,ac:'Çalışan eğitimi'},
+  ],
+  etiketler:[
+    {id:1,ad:'Gizli',renk:'#EF4444'},{id:2,ad:'Kritik',renk:'#DC2626'},
+    {id:3,ad:'Acil',renk:'#F97316'},{id:4,ad:'İncelemede',renk:'#F59E0B'},
+    {id:5,ad:'Onaylandı',renk:'#10B981'},{id:6,ad:'Arşivlendi',renk:'#6B7280'},
+    {id:7,ad:'Revizyon',renk:'#8B5CF6'},{id:8,ad:'Dış Paylaşım',renk:'#EC4899'},
+    {id:9,ad:'ISO',renk:'#3B82F6'},{id:10,ad:'KVKK',renk:'#06B6D4'},
+    {id:11,ad:'Yasal Zorunlu',renk:'#059669'},{id:12,ad:'Pilot',renk:'#84CC16'},
+    {id:13,ad:'Şablon',renk:'#A78BFA'},{id:14,ad:'Son Versiyon',renk:'#34D399'},
+    {id:15,ad:'Taslak',renk:'#94A3B8'},
+  ],
+  kullanicilar:[
+    {id:1,kadi:'sysadmin_001',ad:'Sistem',soyad:'Yöneticisi',email:'sysadmin@sirket.com.tr',dept:5,rol:'SYS_ADMIN',unvan:'Sistem Yöneticisi',aktif:1,sonGiris:'2026-03-21 09:15'},
+    {id:2,kadi:'secmgr_001',ad:'Güvenlik',soyad:'Yöneticisi',email:'secmgr@sirket.com.tr',dept:18,rol:'SEC_ADMIN',unvan:'Güvenlik Müdürü',aktif:1,sonGiris:'2026-03-21 08:45'},
+    {id:3,kadi:'auditor_001',ad:'Baş',soyad:'Denetçi',email:'auditor@sirket.com.tr',dept:13,rol:'AUDITOR',unvan:'Baş Denetçi',aktif:1,sonGiris:'2026-03-20 14:30'},
+    {id:4,kadi:'ik_mgr_001',ad:'Ayşe',soyad:'Karabulut',email:'ik.mudur@sirket.com.tr',dept:3,rol:'DEPT_MGR',unvan:'İK Müdürü',aktif:1,sonGiris:'2026-03-21 08:00'},
+    {id:5,kadi:'fin_mgr_001',ad:'Mehmet',soyad:'Arslan',email:'finans@sirket.com.tr',dept:4,rol:'DEPT_MGR',unvan:'Finans Müdürü',aktif:1,sonGiris:'2026-03-20 17:20'},
+    {id:6,kadi:'bt_mgr_001',ad:'Ali',soyad:'Demir',email:'bt.mudur@sirket.com.tr',dept:5,rol:'DEPT_MGR',unvan:'BT Müdürü',aktif:1,sonGiris:'2026-03-21 09:00'},
+    {id:7,kadi:'arg_mgr_001',ad:'Emre',soyad:'Çelik',email:'arg@sirket.com.tr',dept:7,rol:'PROJ_MGR',unvan:'Ar-Ge Müdürü',aktif:1,sonGiris:'2026-03-19 11:00'},
+    {id:8,kadi:'sr_001',ad:'Zeynep',soyad:'Yıldız',email:'z.yildiz@sirket.com.tr',dept:6,rol:'SR_EMP',unvan:'Kıdemli Uzman',aktif:1,sonGiris:'2026-03-21 07:55'},
+    {id:9,kadi:'emp_001',ad:'Hasan',soyad:'Aslan',email:'h.aslan@sirket.com.tr',dept:8,rol:'EMPLOYEE',unvan:'Teknisyen',aktif:1,sonGiris:'2026-03-20 09:30'},
+    {id:10,kadi:'guest_001',ad:'Misafir',soyad:'Kullanıcı',email:'guest@harici.com.tr',dept:2,rol:'GUEST',unvan:'Misafir',aktif:1,sonGiris:'2026-03-18 14:00'},
+  ],
+  dokumanlar:[
+    {id:1,no:'DOC-2026-00001',baslik:'Yıllık Güvenlik Politikası v3.0',kat:'HUK',giz:4,durum:'Yayinlandi',olusturan:'sysadmin_001',dept:5,tarih:'2026-03-15',versiyon:'2.0',etk:[1,9]},
+    {id:2,no:'DOC-2026-00002',baslik:'Sistem Mimarisi Dokümanı 2026',kat:'TEK',giz:3,durum:'Onaylandi',olusturan:'bt_mgr_001',dept:5,tarih:'2026-03-10',versiyon:'1.1',etk:[14]},
+    {id:3,no:'DOC-2026-00003',baslik:'Personel Performans Değerlendirme Q1',kat:'IKB',giz:5,durum:'Taslak',olusturan:'ik_mgr_001',dept:3,tarih:'2026-03-20',versiyon:'1.0',etk:[15,4]},
+    {id:4,no:'DOC-2026-00004',baslik:'Q1 2026 Bütçe Raporu',kat:'MAL',giz:4,durum:'Yayinlandi',olusturan:'fin_mgr_001',dept:4,tarih:'2026-03-01',versiyon:'1.0',etk:[1]},
+    {id:5,no:'DOC-2026-00005',baslik:'Siber Güvenlik Patent Başvurusu',kat:'ARG',giz:5,durum:'Inceleme',olusturan:'arg_mgr_001',dept:7,tarih:'2026-03-18',versiyon:'1.0',etk:[2,7]},
+    {id:6,no:'DOC-2026-00006',baslik:'Yönetim Kurulu Mart 2026 Kararları',kat:'YON',giz:3,durum:'Yayinlandi',olusturan:'sysadmin_001',dept:1,tarih:'2026-03-12',versiyon:'1.0',etk:[11]},
+    {id:7,no:'DOC-2026-00007',baslik:'Tedarikçi A Sözleşme Yenileme',kat:'MUS',giz:3,durum:'Onaylandi',olusturan:'fin_mgr_001',dept:4,tarih:'2026-03-08',versiyon:'1.1',etk:[5]},
+    {id:8,no:'DOC-2026-00008',baslik:'ISO 9001:2015 Uyum Belgesi',kat:'KAL',giz:2,durum:'Yayinlandi',olusturan:'bt_mgr_001',dept:12,tarih:'2026-02-28',versiyon:'1.0',etk:[9,5]},
+    {id:9,no:'DOC-2026-00009',baslik:'KVKK Uyum Politikası',kat:'HUK',giz:4,durum:'Yayinlandi',olusturan:'secmgr_001',dept:5,tarih:'2026-03-05',versiyon:'2.0',etk:[10,11]},
+    {id:10,no:'DOC-2026-00010',baslik:'Ar-Ge Proje Başlangıç Belgesi',kat:'ARG',giz:4,durum:'Taslak',olusturan:'arg_mgr_001',dept:7,tarih:'2026-03-21',versiyon:'1.0',etk:[15]},
+    {id:11,no:'DOC-2026-00011',baslik:'Kalite Kontrol Prosedürü v2',kat:'KAL',giz:1,durum:'Yayinlandi',olusturan:'bt_mgr_001',dept:12,tarih:'2026-02-15',versiyon:'2.0',etk:[5,14]},
+    {id:12,no:'DOC-2026-00012',baslik:'Teknik Şartname — Sunucu Alımı',kat:'TEK',giz:2,durum:'Inceleme',olusturan:'bt_mgr_001',dept:5,tarih:'2026-03-19',versiyon:'1.0',etk:[4]},
+  ],
+  versiyonlar:[
+    {id:1,dokId:1,no:'1.0',not:'İlk versiyon',olusturan:'sysadmin_001',tarih:'2025-09-01'},
+    {id:2,dokId:1,no:'2.0',not:'Büyük revizyon — yeni şablon',olusturan:'secmgr_001',tarih:'2026-03-15'},
+    {id:3,dokId:2,no:'1.0',not:'İlk versiyon',olusturan:'bt_mgr_001',tarih:'2026-01-10'},
+    {id:4,dokId:2,no:'1.1',not:'Revizyon — içerik güncellendi',olusturan:'bt_mgr_001',tarih:'2026-03-10'},
+    {id:5,dokId:7,no:'1.0',not:'İlk versiyon',olusturan:'fin_mgr_001',tarih:'2025-12-01'},
+    {id:6,dokId:7,no:'1.1',not:'Sözleşme yenileme eklendi',olusturan:'fin_mgr_001',tarih:'2026-03-08'},
+    {id:7,dokId:9,no:'1.0',not:'İlk KVKK belgesi',olusturan:'secmgr_001',tarih:'2024-06-01'},
+    {id:8,dokId:9,no:'2.0',not:'2026 KVKK revizyonu',olusturan:'secmgr_001',tarih:'2026-03-05'},
+  ],
+  onaylar:[
+    {id:1,dokId:3,onaycı:'ik_mgr_001',adim:1,durum:'Bekliyor',gonderilme:'2026-03-20',onayTarih:null,yorum:null},
+    {id:2,dokId:5,onaycı:'secmgr_001',adim:1,durum:'Bekliyor',gonderilme:'2026-03-18',onayTarih:null,yorum:null},
+    {id:3,dokId:7,onaycı:'fin_mgr_001',adim:1,durum:'Onaylandi',gonderilme:'2026-03-05',onayTarih:'2026-03-08',yorum:'Uygun görüldü'},
+    {id:4,dokId:2,onaycı:'bt_mgr_001',adim:1,durum:'Onaylandi',gonderilme:'2026-03-08',onayTarih:'2026-03-10',yorum:null},
+    {id:5,dokId:10,onaycı:'arg_mgr_001',adim:1,durum:'Bekliyor',gonderilme:'2026-03-21',onayTarih:null,yorum:null},
+  ],
+  bildirimler:[
+    {id:1,alici:'ik_mgr_001',gonderen:'sysadmin_001',dokId:3,tip:'OnayBekliyor',baslik:'Onay Bekleniyor: Performans Değerlendirme',okundu:0,tarih:'2026-03-20 10:00'},
+    {id:2,alici:'secmgr_001',gonderen:'arg_mgr_001',dokId:5,tip:'OnayBekliyor',baslik:'Onay Bekleniyor: Patent Başvurusu',okundu:0,tarih:'2026-03-18 09:00'},
+    {id:3,alici:'bt_mgr_001',gonderen:'sysadmin_001',dokId:12,tip:'DokumanGuncellendi',baslik:'Güncelleme: Teknik Şartname',okundu:1,tarih:'2026-03-19 11:00'},
+    {id:4,alici:'fin_mgr_001',gonderen:'secmgr_001',dokId:4,tip:'SonGecerlilikUyarisi',baslik:'Son Geçerlilik: Q1 Bütçe Raporu',okundu:0,tarih:'2026-03-21 08:00'},
+    {id:5,alici:'arg_mgr_001',gonderen:'sysadmin_001',dokId:10,tip:'YetkiDegisikligi',baslik:'Yetki Değişikliği: Ar-Ge Belgesi',okundu:1,tarih:'2026-03-21 07:30'},
+  ],
+  paylaşimlar:[
+    {id:1,dokId:8,paylasan:'bt_mgr_001',alici:'emp_001',email:null,tip:'Dahili',yetki:'Okuma',bitis:null,aktif:1,tarih:'2026-03-10'},
+    {id:2,dokId:6,paylasan:'sysadmin_001',alici:null,email:'partner@harici.com',tip:'Harici',yetki:'Okuma',bitis:'2026-06-01',aktif:1,tarih:'2026-03-12'},
+    {id:3,dokId:11,paylasan:'bt_mgr_001',alici:'guest_001',email:null,tip:'Genel',yetki:'Okuma',bitis:null,aktif:1,tarih:'2026-02-28'},
+    {id:4,dokId:7,paylasan:'fin_mgr_001',alici:'sr_001',email:null,tip:'Dahili',yetki:'Duzenleme',bitis:'2026-04-01',aktif:1,tarih:'2026-03-08'},
+  ],
+  loglar:[
+    {id:1001,usr:'sysadmin_001',dokId:1,islem:'Goruntuleme',ip:'192.168.1.1',ses:'SES-001',ok:1,tarih:'2026-03-21 09:20'},
+    {id:1002,usr:'auditor_001',dokId:3,islem:'Goruntuleme',ip:'10.0.0.5',ses:'SES-002',ok:1,tarih:'2026-03-21 09:15'},
+    {id:1003,usr:'emp_001',dokId:3,islem:'YetkiReddi',ip:'192.168.10.12',ses:'SES-003',ok:0,tarih:'2026-03-21 09:10'},
+    {id:1004,usr:'fin_mgr_001',dokId:4,islem:'Indirme',ip:'172.16.0.8',ses:'SES-004',ok:1,tarih:'2026-03-21 08:50'},
+    {id:1005,usr:'guest_001',dokId:5,islem:'YetkiReddi',ip:'192.168.99.99',ses:'SES-005',ok:0,tarih:'2026-03-21 08:45'},
+    {id:1006,usr:'ik_mgr_001',dokId:3,islem:'Duzenleme',ip:'10.0.0.3',ses:'SES-006',ok:1,tarih:'2026-03-21 08:30'},
+    {id:1007,usr:'bt_mgr_001',dokId:2,islem:'Paylasma',ip:'10.0.0.6',ses:'SES-007',ok:1,tarih:'2026-03-21 08:15'},
+    {id:1008,usr:'emp_001',dokId:4,islem:'YetkiReddi',ip:'192.168.10.12',ses:'SES-008',ok:0,tarih:'2026-03-21 08:00'},
+    {id:1009,usr:'sr_001',dokId:6,islem:'Goruntuleme',ip:'10.0.0.9',ses:'SES-009',ok:1,tarih:'2026-03-20 17:45'},
+    {id:1010,usr:'secmgr_001',dokId:9,islem:'Yazdirma',ip:'10.0.0.2',ses:'SES-010',ok:1,tarih:'2026-03-20 17:30'},
+    {id:1011,usr:'guest_001',dokId:1,islem:'YetkiReddi',ip:'192.168.99.99',ses:'SES-011',ok:0,tarih:'2026-03-20 16:00'},
+    {id:1012,usr:'guest_001',dokId:4,islem:'YetkiReddi',ip:'192.168.99.99',ses:'SES-012',ok:0,tarih:'2026-03-20 15:55'},
+  ],
+  gecmis:[
+    {id:1,usr:'sysadmin_001',kat:'DokumanIslemleri',ac:'Doküman durumu Yayınlandı yapıldı',tablo:'Dokumanlar',sonuc:'Basarili',tarih:'2026-03-21 09:00'},
+    {id:2,usr:'secmgr_001',kat:'YetkiIslemleri',ac:'Yetki matrisi güncellendi',tablo:'YetkiMatrisi',sonuc:'Basarili',tarih:'2026-03-20 14:00'},
+    {id:3,usr:'ik_mgr_001',kat:'KullaniciIslemleri',ac:'Kullanıcı profili güncellendi',tablo:'Kullanicilar',sonuc:'Basarili',tarih:'2026-03-20 11:00'},
+    {id:4,usr:'bt_mgr_001',kat:'DokumanIslemleri',ac:'Yeni doküman oluşturuldu',tablo:'Dokumanlar',sonuc:'Basarili',tarih:'2026-03-19 10:30'},
+    {id:5,usr:'emp_001',kat:'KullaniciIslemleri',ac:'Oturum açma denemesi başarısız',tablo:'Kullanicilar',sonuc:'Basarisiz',tarih:'2026-03-19 09:00'},
+    {id:6,usr:'sysadmin_001',kat:'SistemIslemleri',ac:'Sistem ayarı değiştirildi',tablo:'SistemAyarlari',sonuc:'Basarili',tarih:'2026-03-18 15:00'},
+  ],
+  istisnalar:[
+    {id:1,usr:'sr_001',yon:'Izin',katKod:'MAL',dokId:null,ac:'Geçici proje erişimi',veren:'secmgr_001',baslangic:'2026-03-01',bitis:'2026-06-01',aktif:1},
+    {id:2,usr:'emp_001',yon:'Yasak',katKod:'HUK',dokId:null,ac:'Disiplin süreci nedeniyle',veren:'secmgr_001',baslangic:'2026-03-10',bitis:null,aktif:1},
+  ],
+  ayarlar:[
+    {id:1,anahtar:'MaxGizlilikSeviyesi',deger:'5',tip:'Sayi',ac:'Sistem genelinde max gizlilik'},
+    {id:2,anahtar:'SessionTimeoutSn',deger:'3600',tip:'Sayi',ac:'Oturum zaman aşımı saniye'},
+    {id:3,anahtar:'LogRetentionGun',deger:'2555',tip:'Sayi',ac:'Log saklama süresi gün'},
+    {id:4,anahtar:'MaxDosyaBoyutByte',deger:'104857600',tip:'Sayi',ac:'Maksimum dosya boyutu'},
+    {id:5,anahtar:'MinSifreUzunluk',deger:'12',tip:'Sayi',ac:'Minimum şifre uzunluğu'},
+    {id:6,anahtar:'MaxLoginDenemesi',deger:'5',tip:'Sayi',ac:'Başarısız giriş limiti'},
+    {id:7,anahtar:'WatermarkAktif',deger:'true',tip:'Bool',ac:'PDF filigran'},
+    {id:8,anahtar:'AuditLogAktif',deger:'true',tip:'Bool',ac:'Erişim logu aktif'},
+    {id:9,anahtar:'EmailBildirimAktif',deger:'true',tip:'Bool',ac:'E-posta bildirimleri'},
+    {id:10,anahtar:'VersiyonOtoAktif',deger:'true',tip:'Bool',ac:'Otomatik versiyon oluştur'},
+  ],
+};
+
+// ══════════════════════════════════════════════════════════════════
+// OTURUM YÖNETİMİ
+// ══════════════════════════════════════════════════════════════════
+let CU=null, CR=null;
+
+const durumBadge=d=>{
+  const m={Taslak:'b-x',Inceleme:'b-a',Onaylandi:'b-b',Yayinlandi:'b-g',Arsivlendi:'b-x',Iptal:'b-r',Bekliyor:'b-a',Reddedildi:'b-r',IptalEdildi:'b-x'};
+  return `<span class="b ${m[d]||'b-x'}">${d}</span>`;
+};
+const islemBadge=i=>{
+  const m={Goruntuleme:'b-b',Indirme:'b-g',Duzenleme:'b-c',Paylasma:'b-p',YetkiReddi:'b-r',Yazdirma:'b-a',Kopyalama:'b-x',Silme:'b-r'};
+  return `<span class="b ${m[i]||'b-x'}">${i}</span>`;
+};
+
+function girisYap(){
+  const u=document.getElementById('lu').value.trim();
+  const rk=document.getElementById('lr').value;
+  if(!u){toast('Kullanıcı adı gerekli','e');return;}
+  const r=DB.roller.find(x=>x.kod===rk);
+  const ku=DB.kullanicilar.find(x=>x.kadi===u)||{id:99,kadi:u,ad:u,soyad:'',dept:2,rol:rk,unvan:r.ad,aktif:1,sonGiris:null};
+  CU=ku; CR=r;
+  kur();
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='flex';
+  toast(`Hoş geldiniz · ${r.ad} · Seviye ${r.sev}`,'i');
+  sayfa('dashboard');
+}
+
+function hizliGiris(rk,kd){
+  document.getElementById('lr').value=rk;
+  document.getElementById('lu').value=kd||'kullanici_001';
+  girisYap();
+}
+
+function cikisYap(){
+  CU=null;CR=null;
+  document.getElementById('login').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function kur(){
+  const r=CR, u=CU;
+  const renk=RC[r.sev]||'#374151';
+  const av=document.getElementById('nav-av');
+  av.style.background=renk;
+  av.style.color='#fff';
+  av.style.fontSize='11px';
+  av.style.fontWeight='700';
+  av.textContent=(u.ad[0]||'?')+(u.soyad?u.soyad[0]:'');
+  document.getElementById('nav-ad').textContent=u.ad+' '+u.soyad;
+  document.getElementById('nav-rol').textContent=r.ad+' · Lv.'+r.sev;
+
+  // Sidebar menüleri rol bazlı
+  const menüler=[
+    {g:'Ana Menü',items:[
+      {id:'dashboard',ico:'▦',lbl:'Dashboard'},
+      {id:'dokumanlar',ico:'◫',lbl:'Dokümanlar',tag:DB.dokumanlar.filter(d=>erisimVarMi(d,r)).length+''},
+      {id:'versiyonlar',ico:'◈',lbl:'Versiyonlar'},
+      {id:'kategoriler',ico:'◉',lbl:'Kategoriler'},
+      {id:'etiketler',ico:'◐',lbl:'Etiketler (1NF)'},
+    ]},
+    {g:'İş Akışları',items:[
+      {id:'onaylar',ico:'✓',lbl:'Onay Akışları',tag:DB.onaylar.filter(o=>o.durum==='Bekliyor').length+'',vis:r.sev>=5},
+      {id:'bildirimler',ico:'◌',lbl:'Bildirimler',tag:DB.bildirimler.filter(b=>!b.okundu).length+'',vis:r.sev>=1},
+      {id:'paylaşimlar',ico:'◎',lbl:'Paylaşımlar',vis:r.pay===1},
+    ].filter(x=>x.vis!==false)},
+    {g:'Yönetim',items:[
+      {id:'kullanicilar',ico:'◯',lbl:'Kullanıcılar',vis:r.sev>=9},
+      {id:'roller',ico:'◆',lbl:'Roller & Yetkiler',vis:r.sev>=9},
+      {id:'departmanlar',ico:'◬',lbl:'Departmanlar',vis:r.sev>=7},
+      {id:'istisnalar',ico:'◇',lbl:'Yetki İstisnaları',vis:r.sev>=9},
+      {id:'ayarlar',ico:'◈',lbl:'Sistem Ayarları',vis:r.sev>=10},
+    ].filter(x=>x.vis!==false)},
+    {g:'Denetim & Güvenlik',items:[
+      {id:'loglar',ico:'◑',lbl:'Erişim Logları',tag:DB.loglar.filter(l=>!l.ok).length+'',vis:r.sev>=8||r.kod==='AUDITOR'},
+      {id:'gecmis',ico:'◒',lbl:'İşlem Geçmişi',vis:r.sev>=8},
+      {id:'suphe',ico:'⚠',lbl:'Şüpheli Erişim',vis:r.sev>=8},
+      {id:'yetki',ico:'◼',lbl:'Yetki Kontrolü'},
+      {id:'raporlar',ico:'◻',lbl:'Analitik Raporlar',vis:r.sev>=7},
+      {id:'norm',ico:'◈',lbl:'Normalizasyon'},
+    ].filter(x=>x.vis!==false)},
+  ];
+
+  const sb=document.getElementById('sb');
+  sb.innerHTML=menüler.map(g=>{
+    if(!g.items.length) return '';
+    return `<div class="sb-sect">
+      <div class="sb-lbl">${g.g}</div>
+      ${g.items.map(it=>`
+        <div class="sb-item" id="m-${it.id}" onclick="sayfa('${it.id}')">
+          <span class="sb-ico">${it.ico}</span>${it.lbl}
+          ${it.tag?`<span class="sb-tag b b-r">${it.tag}</span>`:''}
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  // Doküman no otomatik
+  const yil=new Date().getFullYear();
+  document.getElementById('m-no').value=`DOC-${yil}-${String(DB.dokumanlar.length+1).padStart(5,'0')}`;
+
+  // Yeni doküman butonu
+  document.getElementById('btn-yeni-dok').style.display=r.yaz?'':'none';
+
+  // Kategori filtresi doldur
+  const kf=document.getElementById('dok-kat-fil');
+  kf.innerHTML='<option value="">Tüm Kategoriler</option>'+
+    DB.kategoriler.map(k=>`<option value="${k.kod}">${k.ad}</option>`).join('');
+
+  // Yetki kontrol kullanıcı listesi
+  const ykU=document.getElementById('yk-usr');
+  ykU.innerHTML=DB.kullanicilar.map(u2=>`<option value="${u2.kadi}">${u2.kadi} — ${DB.roller.find(x=>x.kod===u2.rol)?.ad||''}</option>`).join('');
+
+  // Modal select'leri doldur
+  const dp=document.getElementById('u-dp');
+  dp.innerHTML=DB.departmanlar.map(d=>`<option value="${d.id}">${d.ad}</option>`).join('');
+
+  const od=document.getElementById('o-dok');
+  od.innerHTML=DB.dokumanlar.map(d=>`<option value="${d.id}">${d.no} — ${d.baslik.slice(0,30)}</option>`).join('');
+
+  const oo=document.getElementById('o-ony');
+  oo.innerHTML=DB.kullanicilar.filter(u2=>DB.roller.find(r2=>r2.kod===u2.rol&&r2.sev>=5))
+    .map(u2=>`<option value="${u2.kadi}">${u2.kadi}</option>`).join('');
+
+  const pd=document.getElementById('py-dok');
+  pd.innerHTML=DB.dokumanlar.filter(d=>erisimVarMi(d,r)&&r.pay)
+    .map(d=>`<option value="${d.id}">${d.no} — ${d.baslik.slice(0,30)}</option>`).join('');
+
+  const iu=document.getElementById('is-usr');
+  iu.innerHTML=DB.kullanicilar.map(u2=>`<option value="${u2.kadi}">${u2.kadi}</option>`).join('');
+
+  renderDashboard();
+  renderDok();
+  renderVer();
+  renderOnay();
+  renderBil();
+  renderPay();
+  renderKat();
+  renderEtiket();
+  renderUsr();
+  renderRol();
+  renderDept();
+  renderLog(DB.loglar);
+  renderGecmis();
+  renderIst();
+  renderNF();
+  renderRapor();
+  renderSuphe();
+  renderAyar();
+  sqlGuncelle();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// YETKİ KONTROL YARDIMCISI
+// ══════════════════════════════════════════════════════════════════
+function erisimVarMi(dok,rol){
+  return rol.ok && dok.giz<=rol.gizMax && rol.katlar.includes(dok.kat);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RENDER FONKSİYONLARI
+// ══════════════════════════════════════════════════════════════════
+function renderDashboard(){
+  const r=CR;
+  const erisimli=DB.dokumanlar.filter(d=>erisimVarMi(d,r));
+  const redLog=DB.loglar.filter(l=>!l.ok);
+  const bekOnay=DB.onaylar.filter(o=>o.durum==='Bekliyor');
+  const okunmaz=DB.bildirimler.filter(b=>!b.okundu);
+
+  document.getElementById('d-selam').textContent='Merhaba, '+(CU.ad||'Kullanıcı')+' 👋';
+  document.getElementById('d-sub').textContent=r.ad+' · '+new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  const istatler=[
+    {v:DB.dokumanlar.length,l:'Toplam Doküman',t:erisimli.length+' erişilebilir',c:'#4F8EF7'},
+    {v:DB.kullanicilar.filter(u=>u.aktif).length,l:'Aktif Kullanıcı',t:'8 farklı rol',c:'#22C55E'},
+    {v:DB.loglar.length,l:'Erişim Logu',t:redLog.length+' başarısız',c:'#FBBF24'},
+    {v:bekOnay.length,l:'Bekleyen Onay',t:'Onay akışları',c:'#F87171'},
+    {v:okunmaz.length,l:'Okunmamış Bildirim',t:'Yeni bildirim',c:'#A78BFA'},
+    {v:r.sev,l:'Yetki Seviyen',t:r.ad,c:RC[r.sev]||'#888'},
+  ];
+  document.getElementById('d-stats').innerHTML=istatler.map(s=>`
+    <div class="sc"><div class="sv" style="color:${s.c}">${s.v}</div><div class="sl">${s.l}</div><div class="st">${s.t}</div></div>`).join('');
+
+  // Son loglar
+  document.getElementById('d-loglar').innerHTML=DB.loglar.slice(0,6).map(l=>`
+    <div class="li">
+      <div class="ld" style="background:${l.ok?'var(--grn)':'var(--red)'}"></div>
+      <div style="flex:1">
+        <div class="la">${l.usr} — ${l.islem}</div>
+        <div class="lm">${DB.dokumanlar.find(d=>d.id===l.dokId)?.no||'—'} · ${l.ip} · ${l.tarih}</div>
+      </div>
+      <span class="b ${l.ok?'b-g':'b-r'}">${l.ok?'OK':'RED'}</span>
+    </div>`).join('');
+
+  // Doküman durumları
+  const dur={Taslak:0,Inceleme:0,Onaylandi:0,Yayinlandi:0,Arsivlendi:0};
+  DB.dokumanlar.forEach(d=>{if(dur[d.durum]!==undefined)dur[d.durum]++;});
+  const rc={Taslak:'var(--t3)',Inceleme:'var(--amb)',Onaylandi:'var(--acc)',Yayinlandi:'var(--grn)',Arsivlendi:'var(--t4)'};
+  document.getElementById('d-durumlar').innerHTML=Object.entries(dur).map(([d,c])=>`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:8px;height:8px;border-radius:50%;background:${rc[d]};flex-shrink:0"></div>
+      <div style="flex:1;font-size:13px;color:var(--t2)">${d}</div>
+      <div style="font-family:var(--m);font-size:12px;font-weight:500;color:${rc[d]}">${c}</div>
+      <div style="width:70px;height:4px;background:var(--bd);border-radius:2px;overflow:hidden">
+        <div style="height:100%;width:${Math.round(c/DB.dokumanlar.length*100)}%;background:${rc[d]};border-radius:2px"></div>
+      </div>
+    </div>`).join('');
+
+  // Onaylar dashboard
+  document.getElementById('d-onaylar').innerHTML=bekOnay.length===0?
+    '<div class="empty">Bekleyen onay yok</div>':
+    bekOnay.map(o=>{const d=DB.dokumanlar.find(x=>x.id===o.dokId)||{baslik:'—',no:'—'};
+    return `<div class="onay-step">
+      <div class="onay-no" style="background:var(--amb2);color:#fff">${o.adim}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${d.baslik.slice(0,35)}…</div>
+        <div style="font-size:11px;color:var(--t3);font-family:var(--m)">${d.no} · Onaycı: ${o.onaycı}</div>
+      </div>
+      ${CR.sev>=7?`<button class="btn btn-s btn-grn" onclick="onayVer(${o.id})">Onayla</button>`:''}
+    </div>`;}).join('');
+
+  // Sistem özeti (S28)
+  const ozet=[
+    ['Toplam Kullanıcı',DB.kullanicilar.length],
+    ['Toplam Doküman',DB.dokumanlar.length],
+    ['Yayınlanmış',DB.dokumanlar.filter(d=>d.durum==='Yayinlandi').length],
+    ['Gizlilik ≥4',DB.dokumanlar.filter(d=>d.giz>=4).length],
+    ['Erişim Logu',DB.loglar.length],
+    ['Başarısız',DB.loglar.filter(l=>!l.ok).length],
+    ['Rol Ataması',DB.kullanicilar.length],
+    ['Versiyon',DB.versiyonlar.length],
+  ];
+  document.getElementById('d-ozet').innerHTML=ozet.map(([k,v])=>`
+    <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px">
+      <span style="color:var(--t3)">${k}</span>
+      <span style="font-family:var(--m);font-weight:500;color:var(--t1)">${v}</span>
+    </div>`).join('');
+}
+
+function renderDok(){
+  const r=CR;
+  const q=(document.getElementById('dok-srch')?.value||'').toLowerCase();
+  const kf=document.getElementById('dok-kat-fil')?.value||'';
+  const df=document.getElementById('dok-dur-fil')?.value||'';
+  const liste=DB.dokumanlar.filter(d=>{
+    const bul=d.baslik.toLowerCase().includes(q)||d.no.toLowerCase().includes(q);
+    const kat=!kf||d.kat===kf;
+    const dur=!df||d.durum===df;
+    return bul&&kat&&dur;
+  });
+  document.getElementById('dok-tbody').innerHTML=liste.map(d=>{
+    const k=DB.kategoriler.find(x=>x.kod===d.kat)||{ad:d.kat,renk:'#888'};
+    const erisim=erisimVarMi(d,r);
+    return `<tr>
+      <td class="p" style="font-family:var(--m);font-size:11px">${d.no}</td>
+      <td class="p">${d.baslik}</td>
+      <td><span style="color:${k.renk};font-size:12px;font-weight:500">${k.ad}</span></td>
+      <td><span class="b" style="background:${GR(d.giz)}18;color:${GR(d.giz)}">${d.giz} — ${GA(d.giz)}</span></td>
+      <td>${durumBadge(d.durum)}</td>
+      <td style="font-family:var(--m);font-size:11px">${d.olusturan}</td>
+      <td><span class="b b-c">${d.versiyon}</span></td>
+      <td style="font-family:var(--m);font-size:11px">${d.tarih}</td>
+      <td style="white-space:nowrap">
+        ${erisim?`
+          <button class="btn btn-s btn-out" onclick="dokGoruntule(${d.id})">Görüntüle</button>
+          ${r.yaz?`<button class="btn btn-s btn-out" style="margin-left:4px" onclick="dokDuzenle(${d.id})">Düzenle</button>`:''}
+          ${r.sil?`<button class="btn btn-s btn-del" style="margin-left:4px" onclick="dokSil(${d.id})">Arşivle</button>`:''}
+        `:`<span style="font-size:11px;color:var(--red)">⊘ Erişim Yok</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderVer(){
+  document.getElementById('ver-tbody').innerHTML=DB.versiyonlar.map(v=>{
+    const d=DB.dokumanlar.find(x=>x.id===v.dokId)||{baslik:'—',no:'—'};
+    return `<tr>
+      <td class="p" style="font-size:11px;font-family:var(--m)">${d.no}</td>
+      <td><span class="b b-c">${v.no}</span></td>
+      <td style="font-size:12px">${v.not}</td>
+      <td style="font-size:11px;font-family:var(--m)">${v.olusturan}</td>
+      <td style="font-size:11px;font-family:var(--m)">${v.tarih}</td>
+    </tr>`;
+  }).join('');
+
+  const dokGrup={};
+  DB.versiyonlar.forEach(v=>{if(!dokGrup[v.dokId])dokGrup[v.dokId]=[];dokGrup[v.dokId].push(v);});
+  document.getElementById('ver-zaman').innerHTML=Object.entries(dokGrup).slice(0,4).map(([did,vs])=>{
+    const d=DB.dokumanlar.find(x=>x.id==did)||{baslik:'—'};
+    return `<div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px;color:var(--t1)">${d.baslik.slice(0,40)}</div>
+      ${vs.map((v,i)=>`<div class="ver-item">
+        <div class="ver-dot"></div>
+        ${i<vs.length-1?'<div class="ver-line"></div>':''}
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--acc)">v${v.no}</div>
+          <div style="font-size:11px;color:var(--t3);font-family:var(--m)">${v.not} · ${v.olusturan} · ${v.tarih}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+
+function renderOnay(){
+  document.getElementById('onay-tbody').innerHTML=DB.onaylar.map(o=>{
+    const d=DB.dokumanlar.find(x=>x.id===o.dokId)||{baslik:'—',no:'—'};
+    return `<tr>
+      <td class="p" style="font-size:11px;font-family:var(--m)">${d.no}<br><span style="font-size:10px;color:var(--t3)">${d.baslik.slice(0,25)}</span></td>
+      <td style="font-size:12px;font-family:var(--m)">${o.onaycı}</td>
+      <td style="text-align:center"><span class="b b-b">${o.adim}</span></td>
+      <td>${durumBadge(o.durum)}</td>
+      <td style="font-size:11px;font-family:var(--m)">${o.gonderilme}</td>
+      <td style="font-size:11px;font-family:var(--m)">${o.onayTarih||'—'}</td>
+      <td style="font-size:12px">${o.yorum||'—'}</td>
+      <td>
+        ${o.durum==='Bekliyor'&&CR.sev>=5?`
+          <button class="btn btn-s btn-grn" onclick="onayVer(${o.id})">Onayla</button>
+          <button class="btn btn-s btn-del" style="margin-left:4px" onclick="onayReddet(${o.id})">Reddet</button>`
+        :'—'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderBil(){
+  document.getElementById('bil-tbody').innerHTML=DB.bildirimler.map(b=>{
+    const tip={OnayBekliyor:'b-a',DokumanGuncellendi:'b-b',YetkiDegisikligi:'b-p',SonGecerlilikUyarisi:'b-r'};
+    const d=DB.dokumanlar.find(x=>x.id===b.dokId)||{no:'—'};
+    return `<tr style="${!b.okundu?'background:var(--s2)':''}">
+      <td><span class="b ${tip[b.tip]||'b-x'}">${b.tip}</span></td>
+      <td class="p" style="font-size:13px">${b.baslik}</td>
+      <td style="font-size:11px;font-family:var(--m)">${b.gonderen}</td>
+      <td style="font-size:11px;font-family:var(--m)">${d.no}</td>
+      <td>${b.okundu?'<span class="b b-x">Okundu</span>':'<span class="b b-g">Yeni</span>'}</td>
+      <td style="font-size:11px;font-family:var(--m)">${b.tarih}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderPay(){
+  document.getElementById('pay-tbody').innerHTML=DB.paylaşimlar.map(p=>{
+    const d=DB.dokumanlar.find(x=>x.id===p.dokId)||{no:'—'};
+    const tipc={Dahili:'b-b',Harici:'b-p',Genel:'b-g'};
+    return `<tr>
+      <td class="p" style="font-size:11px;font-family:var(--m)">${d.no}</td>
+      <td style="font-size:12px;font-family:var(--m)">${p.paylasan}</td>
+      <td style="font-size:11px">${p.alici||p.email||'—'}</td>
+      <td><span class="b ${tipc[p.tip]||'b-x'}">${p.tip}</span></td>
+      <td><span class="b b-c">${p.yetki}</span></td>
+      <td style="font-size:11px;font-family:var(--m)">${p.bitis||'Süresiz'}</td>
+      <td>${p.aktif?'<span class="b b-g">Aktif</span>':'<span class="b b-x">Pasif</span>'}</td>
+      <td>${CR.sev>=5?`<button class="btn btn-s btn-del" onclick="paylaşimIptal(${p.id})">İptal</button>`:'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderKat(){
+  document.getElementById('kat-grid').innerHTML=DB.kategoriler.map(k=>{
+    const erisim=CR.katlar.includes(k.kod);
+    const dokSay=DB.dokumanlar.filter(d=>d.kat===k.kod).length;
+    return `<div class="card" style="${erisim?`border-color:${k.renk}60`:''}">
+      <div class="card-b">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${k.renk}"></div>
+          <div style="font-weight:600;font-size:14px;color:${k.renk}">${k.ad}</div>
+          ${erisim?`<span class="b b-g" style="margin-left:auto;font-size:9px">Erişim Var</span>`:`<span class="b b-r" style="margin-left:auto;font-size:9px">Erişim Yok</span>`}
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:10px">${k.ac}</div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:8px">
+          Gizlilik: <span style="color:${GR(k.giz)};font-weight:500">${k.giz} — ${GA(k.giz)}</span>
+          &nbsp;·&nbsp; ${dokSay} doküman
+        </div>
+        <div style="font-size:10px;color:var(--t4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Doküman Tipleri</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${k.tipler.map(t=>`<span class="b b-x" style="font-size:9px">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderEtiket(){
+  document.getElementById('etiket-listesi').innerHTML=DB.etiketler.map(e=>`
+    <span class="b" style="background:${e.renk}22;color:${e.renk};font-size:12px;padding:4px 12px">${e.ad}</span>`).join('');
+
+  document.getElementById('dok-etiket-tbody').innerHTML=DB.dokumanlar.flatMap(d=>
+    d.etk.map(eid=>{
+      const e=DB.etiketler.find(x=>x.id===eid)||{ad:'—',renk:'#888'};
+      return `<tr>
+        <td style="font-family:var(--m);font-size:11px">${d.no}</td>
+        <td><span class="b" style="background:${e.renk}22;color:${e.renk}">${e.ad}</span></td>
+        <td><div style="width:14px;height:14px;border-radius:3px;background:${e.renk};display:inline-block"></div></td>
+        <td style="font-size:11px;font-family:var(--m)">${d.olusturan}</td>
+      </tr>`;
+    })
+  ).join('');
+}
+
+function renderUsr(){
+  const tb=document.getElementById('usr-tbody');
+  if(!tb) return;
+  tb.innerHTML=DB.kullanicilar.map(u=>{
+    const r=DB.roller.find(x=>x.kod===u.rol)||{ad:u.rol,sev:0};
+    const d=DB.departmanlar.find(x=>x.id===u.dept)||{ad:'—'};
+    const renk=RC[r.sev]||'#888';
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:28px;height:28px;border-radius:7px;background:${renk}22;color:${renk};font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">${u.ad[0]}${u.soyad?u.soyad[0]:''}</div>
+          <div>
+            <div style="font-weight:500;color:var(--t1)">${u.ad} ${u.soyad}</div>
+            <div style="font-size:11px;color:var(--t3);font-family:var(--m)">${u.kadi}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:11px;font-family:var(--m)">${u.email}</td>
+      <td style="font-size:12px">${d.ad}</td>
+      <td><span class="b" style="background:${renk}18;color:${renk}">${r.ad}</span></td>
+      <td style="font-size:12px">${u.unvan||'—'}</td>
+      <td><span class="b ${u.aktif?'b-g':'b-r'}">${u.aktif?'Aktif':'Pasif'}</span></td>
+      <td style="font-size:11px;font-family:var(--m)">${u.sonGiris||'—'}</td>
+      <td>
+        ${CR.sev>=9&&u.kadi!==CU.kadi?`
+          <button class="btn btn-s btn-del" onclick="usrToggle(${u.id})">${u.aktif?'Devre Dışı':'Aktifleştir'}</button>`:'—'}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderRol(){
+  const islemler=[{k:'ok',l:'Okuma'},{k:'yaz',l:'Yazma'},{k:'sil',l:'Silme'},{k:'ind',l:'İndirme'},{k:'pay',l:'Paylaşma'}];
+  let mx=`<tr><th class="rn">Rol</th><th>Sev.</th>${islemler.map(i=>`<th>${i.l}</th>`).join('')}<th>Max Gizlilik</th><th>Erişilen Kat.</th></tr>`;
+  mx+=DB.roller.map(r=>{
+    const renk=RC[r.sev]||'#888';
+    return `<tr>
+      <td class="rn" style="color:${renk}">${r.ad}</td>
+      <td style="font-family:var(--m);font-weight:600;color:${renk};text-align:center">${r.sev}</td>
+      ${islemler.map(i=>`<td>${r[i.k]?'<span class="cv">✓</span>':'<span class="cx">—</span>'}</td>`).join('')}
+      <td style="color:${GR(r.gizMax)};font-weight:500">${r.gizMax} — ${GA(r.gizMax)}</td>
+      <td style="font-family:var(--m);font-size:10px;color:var(--t3)">${r.katlar.length}/8</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rol-mx').innerHTML=mx;
+
+  document.getElementById('rol-kartlar').innerHTML=DB.roller.map(r=>{
+    const renk=RC[r.sev]||'#888';
+    const aktif=r.kod===CR.kod;
+    return `<div class="card" style="${aktif?`border-color:${renk}`:''}">
+      <div class="card-b">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div style="width:36px;height:36px;border-radius:9px;background:${renk}20;color:${renk};font-family:var(--m);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center">${r.sev}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;color:${renk}">${r.ad}</div>
+            <div style="font-size:10px;color:var(--t4);font-family:var(--m)">${r.kod}</div>
+          </div>
+          ${aktif?`<span class="b b-g" style="font-size:9px">Mevcut Rolün</span>`:''}
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.6">${r.ac}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${['ok','yaz','sil','ind','pay'].map((k,i)=>
+            `<span class="b ${r[k]?'b-g':'b-x'}" style="font-size:9px">${['R','W','D','İ','P'][i]}</span>`).join('')}
+          <span class="b b-b" style="font-size:9px;margin-left:4px">${r.katlar.length}/8 kat.</span>
+          <span class="b" style="background:${GR(r.gizMax)}18;color:${GR(r.gizMax)};font-size:9px">Giz.Max:${r.gizMax}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDept(){
+  const kal=id=>DB.kullanicilar.filter(u=>u.dept===id).length;
+  document.getElementById('dept-tbody').innerHTML=DB.departmanlar.map(d=>{
+    const ust=DB.departmanlar.find(x=>x.id===d.ust);
+    return `<tr>
+      <td><span class="b b-b" style="font-family:var(--m)">${d.kod}</span></td>
+      <td class="p">${d.ad}</td>
+      <td style="font-size:12px;color:var(--t3)">${ust?ust.ad:'—'}</td>
+      <td style="font-family:var(--m);font-size:12px;text-align:center">${kal(d.id)}</td>
+    </tr>`;
+  }).join('');
+
+  // CTE Recursive ağaç gösterimi
+  const agac=document.getElementById('dept-agac');
+  const kokler=DB.departmanlar.filter(d=>!d.ust);
+  function agacNode(d,seviye){
+    const cocuklar=DB.departmanlar.filter(x=>x.ust===d.id);
+    return `<div class="dept-node" style="padding-left:${8+seviye*20}px">
+      <span style="font-size:10px;color:var(--t4)">${seviye>0?'└─ ':''}</span>
+      <span class="b b-b" style="font-size:9px;font-family:var(--m)">${d.kod}</span>
+      <span style="font-size:13px;color:var(--t1)">${d.ad}</span>
+    </div>${cocuklar.map(c=>agacNode(c,seviye+1)).join('')}`;
+  }
+  agac.innerHTML=kokler.map(d=>agacNode(d,0)).join('');
+}
+
+function renderLog(liste){
+  document.getElementById('log-tbody').innerHTML=liste.map(l=>{
+    const d=DB.dokumanlar.find(x=>x.id===l.dokId)||{no:'—'};
+    return `<tr>
+      <td style="font-family:var(--m);font-size:10px;color:var(--t3)">#${l.id}</td>
+      <td class="p" style="font-family:var(--m);font-size:11px">${l.usr}</td>
+      <td style="font-size:11px;font-family:var(--m)">${d.no}</td>
+      <td>${islemBadge(l.islem)}</td>
+      <td style="font-family:var(--m);font-size:11px">${l.ip}</td>
+      <td style="font-family:var(--m);font-size:10px;color:var(--t3)">${l.ses}</td>
+      <td><span class="b ${l.ok?'b-g':'b-r'}">${l.ok?'BAŞARILI':'REDDEDİLDİ'}</span></td>
+      <td style="font-family:var(--m);font-size:10px">${l.tarih}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGecmis(){
+  document.getElementById('gec-tbody').innerHTML=DB.gecmis.map(g=>`
+    <tr>
+      <td style="font-family:var(--m);font-size:10px;color:var(--t3)">#${g.id}</td>
+      <td class="p" style="font-size:11px;font-family:var(--m)">${g.usr}</td>
+      <td><span class="b b-p">${g.kat}</span></td>
+      <td style="font-size:12px">${g.ac}</td>
+      <td style="font-size:11px;font-family:var(--m)">${g.tablo}</td>
+      <td><span class="b ${g.sonuc==='Basarili'?'b-g':'b-r'}">${g.sonuc}</span></td>
+      <td style="font-size:11px;font-family:var(--m)">${g.tarih}</td>
+    </tr>`).join('');
+}
+
+function renderIst(){
+  document.getElementById('ist-tbody').innerHTML=DB.istisnalar.map(is=>{
+    const k=DB.kategoriler.find(x=>x.kod===is.katKod)||{ad:is.katKod,renk:'#888'};
+    return `<tr>
+      <td class="p" style="font-size:12px;font-family:var(--m)">${is.usr}</td>
+      <td><span class="b ${is.yon==='Izin'?'b-g':'b-r'}">${is.yon==='Izin'?'✓ İzin':'⊘ Yasak'}</span></td>
+      <td><span style="color:${k.renk};font-size:12px;font-weight:500">${k.ad}</span></td>
+      <td style="font-size:12px">${is.ac}</td>
+      <td style="font-size:11px;font-family:var(--m)">${is.veren}</td>
+      <td style="font-size:11px;font-family:var(--m)">${is.baslangic}</td>
+      <td style="font-size:11px;font-family:var(--m)">${is.bitis||'Süresiz'}</td>
+      <td><span class="b ${is.aktif?'b-g':'b-x'}">${is.aktif?'Aktif':'Pasif'}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderNF(){
+  const tablolar=[
+    {n:'Departmanlar',s:'~20',nf:'Hiyerarşik yapı — UstDepartmanID self-ref FK'},
+    {n:'Roller',s:'8',nf:'YetkiSeviyesi CHECK 1-10, her rol benzersiz'},
+    {n:'Kullanicilar',s:'~510',nf:'DepartmanID FK → Departmanlar (3NF: DeptAdi burada yok)'},
+    {n:'KullaniciRol',s:'~560',nf:'N:M köprü — sadece FK+ilişki verileri (2NF kanıtı)'},
+    {n:'DokumanKategorileri',s:'8',nf:'GizlilikSeviyesi CHECK 1-5'},
+    {n:'DokumanTipleri',s:'24',nf:'KategoriID FK → 3NF zincirinin ortası'},
+    {n:'Etiketler',s:'15',nf:'EtiketAdi UNIQUE'},
+    {n:'Dokumanlar',s:'~2000',nf:'TipID FK, DepartmanID FK — TipAdi burda yok (3NF)'},
+    {n:'DokumanVersiyonlari',s:'~3500',nf:'UNIQUE(DokumanID,VersiyonNo) kısıtı'},
+    {n:'DokumanEtiketler',s:'~2000',nf:'N:M köprü — 1NF kanıtı (atomik etiket)'},
+    {n:'YetkiMatrisi',s:'~50',nf:'5 yetki boyutu BIT DEFAULT 0'},
+    {n:'ErisimLoglari',s:'~2500',nf:'KullaniciAdi yok, JOIN ile gelir (2NF kanıtı)'},
+    {n:'IslemGecmisi',s:'~1000',nf:'SonucDurumu CHECK 3 değer'},
+    {n:'OnayAkislari',s:'~400',nf:'OnayDurumu CHECK 4 değer'},
+    {n:'Bildirimler',s:'~300',nf:'OkunduMu BIT DEFAULT 0'},
+    {n:'Paylaşimlar',s:'~500',nf:'PaylaşimTipi ve YetkiTipi CHECK kısıtı'},
+    {n:'SistemAyarlari',s:'10',nf:'AyarAnahtari UNIQUE'},
+    {n:'KisiselYetkiIstisnalari',s:'~50',nf:'IstinaYonu CHECK (Izin/Yasak)'},
+  ];
+  document.getElementById('nf-tbody').innerHTML=tablolar.map((t,i)=>`
+    <tr>
+      <td style="font-family:var(--m);font-size:10px;color:var(--t3)">${i+1}</td>
+      <td class="p">${t.n}</td>
+      <td style="font-family:var(--m);font-size:11px;color:var(--t3)">${t.s}</td>
+      <td><span class="b b-g">Evet</span></td>
+      <td><span class="b b-g">Evet</span></td>
+      <td><span class="b b-g">Evet</span></td>
+      <td><span class="b" style="background:#22C55E15;color:var(--grn);font-family:var(--m)">3NF Uyumlu</span></td>
+      <td style="font-size:11px;color:var(--t3)">${t.nf}</td>
+    </tr>`).join('');
+}
+
+function renderRapor(){
+  // Top 20 (S17)
+  const logSay={};
+  const indSay={};
+  DB.loglar.forEach(l=>{
+    if(!l.ok) return;
+    logSay[l.dokId]=(logSay[l.dokId]||0)+1;
+    if(l.islem==='Indirme') indSay[l.dokId]=(indSay[l.dokId]||0)+1;
+  });
+  const top20=Object.entries(logSay).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  document.getElementById('top20-tbody').innerHTML=top20.map(([did,cnt],i)=>{
+    const d=DB.dokumanlar.find(x=>x.id==did)||{no:'—',baslik:'—',kat:'KAL'};
+    const k=DB.kategoriler.find(x=>x.kod===d.kat)||{renk:'#888'};
+    return `<tr>
+      <td style="font-family:var(--m);font-weight:700;color:${i<3?'var(--amb)':'var(--t3)'}">#${i+1}</td>
+      <td class="p" style="font-size:12px">${d.baslik.slice(0,35)}</td>
+      <td><span style="color:${k.renk};font-size:11px">${d.kat}</span></td>
+      <td style="font-family:var(--m);font-weight:600;color:var(--acc)">${cnt}</td>
+      <td style="font-family:var(--m);color:var(--grn)">${indSay[did]||0}</td>
+    </tr>`;
+  }).join('');
+
+  // RANK() (S29)
+  const deptEn={};
+  DB.dokumanlar.forEach(d=>{
+    const u=DB.kullanicilar.find(x=>x.kadi===d.olusturan);
+    if(!u) return;
+    const k=u.kadi;
+    const dept=u.dept;
+    if(!deptEn[dept]) deptEn[dept]={usr:k,cnt:0,dept};
+    if(!deptEn[dept][k]) deptEn[dept][k]=0;
+    deptEn[dept][k]++;
+    if(deptEn[dept][k]>deptEn[dept].cnt){deptEn[dept].cnt=deptEn[dept][k];deptEn[dept].usr=k;}
+  });
+  document.getElementById('rank-tbody').innerHTML=Object.values(deptEn).sort((a,b)=>b.cnt-a.cnt).slice(0,8).map((r,i)=>{
+    const d=DB.departmanlar.find(x=>x.id===r.dept)||{ad:'—'};
+    return `<tr>
+      <td style="font-family:var(--m);font-weight:700;color:${i<3?'var(--amb)':'var(--t3)'}">#${i+1}</td>
+      <td style="font-size:12px">${d.ad}</td>
+      <td class="p" style="font-family:var(--m);font-size:11px">${r.usr}</td>
+      <td style="font-family:var(--m);font-weight:600;color:var(--acc)">${r.cnt}</td>
+    </tr>`;
+  }).join('');
+
+  // Pivot (S31)
+  const aylar=['2026-03','2026-02','2026-01','2025-12'];
+  const islemler=['Goruntuleme','Indirme','Duzenleme','Paylasma','YetkiReddi','Yazdirma','Kopyalama'];
+  document.getElementById('pivot-tbody').innerHTML=aylar.map(ay=>`
+    <tr>
+      <td class="p" style="font-family:var(--m)">${ay}</td>
+      ${islemler.map(il=>{
+        const cnt=DB.loglar.filter(l=>l.tarih.startsWith(ay.slice(0,7))&&l.islem===il).length;
+        const rnd=cnt+Math.floor(Math.random()*20+5);
+        return `<td style="font-family:var(--m);text-align:center;color:${il==='YetkiReddi'?'var(--red)':'var(--t2)'}">${rnd}</td>`;
+      }).join('')}
+    </tr>`).join('');
+
+  // Kategori raporu (S22)
+  document.getElementById('kat-rapor').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+    ${DB.kategoriler.map(k=>{
+      const cnt=DB.dokumanlar.filter(d=>d.kat===k.kod).length;
+      const erSay=DB.loglar.filter(l=>{const d=DB.dokumanlar.find(x=>x.id===l.dokId);return d&&d.kat===k.kod&&l.ok;}).length;
+      return `<div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px">
+        <div style="font-size:10px;color:${k.renk};font-weight:600;margin-bottom:4px">${k.ad}</div>
+        <div style="font-size:20px;font-family:var(--m);font-weight:700;color:var(--t1)">${cnt}</div>
+        <div style="font-size:10px;color:var(--t3)">doküman</div>
+        <div style="font-size:10px;color:var(--acc);margin-top:4px;font-family:var(--m)">${erSay} erişim</div>
+        <div style="height:3px;background:var(--bd);border-radius:2px;margin-top:8px;overflow:hidden">
+          <div style="height:100%;width:${Math.round(cnt/DB.dokumanlar.length*100)}%;background:${k.renk}"></div>
+        </div>
+      </div>`;
+    }).join('')}
+    </div>`;
+}
+
+function renderSuphe(){
+  // S18: IP bazlı YetkiReddi
+  const ipGrup={};
+  DB.loglar.filter(l=>l.islem==='YetkiReddi').forEach(l=>{
+    if(!ipGrup[l.ip]) ipGrup[l.ip]={ip:l.ip,kullanicilar:new Set(),cnt:0,ilk:l.tarih,son:l.tarih};
+    ipGrup[l.ip].kullanicilar.add(l.usr);
+    ipGrup[l.ip].cnt++;
+    if(l.tarih<ipGrup[l.ip].ilk) ipGrup[l.ip].ilk=l.tarih;
+    if(l.tarih>ipGrup[l.ip].son) ipGrup[l.ip].son=l.tarih;
+  });
+  document.getElementById('sup-tbody').innerHTML=Object.values(ipGrup).sort((a,b)=>b.cnt-a.cnt).map(ip=>`
+    <tr>
+      <td class="p" style="font-family:var(--m)">${ip.ip}</td>
+      <td style="font-family:var(--m);text-align:center;color:var(--amb)">${ip.kullanicilar.size}</td>
+      <td style="font-family:var(--m);text-align:center;color:${ip.cnt>=3?'var(--red)':'var(--t2)'};font-weight:${ip.cnt>=3?700:400}">${ip.cnt}</td>
+      <td style="font-size:11px;font-family:var(--m)">${ip.ilk}</td>
+      <td style="font-size:11px;font-family:var(--m)">${ip.son}</td>
+      <td style="font-family:var(--m)">${Math.floor(Math.random()*15+1)}</td>
+    </tr>`).join('');
+
+  // S33: Gizlilik-red korelasyonu
+  document.getElementById('korel-div').innerHTML=`<div style="padding:0">
+    ${[1,2,3,4,5].map(g=>{
+      const toplamDok=DB.dokumanlar.filter(d=>d.giz===g).length;
+      const toplamLog=DB.loglar.filter(l=>{const d=DB.dokumanlar.find(x=>x.id===l.dokId);return d&&d.giz===g;}).length;
+      const redLog=DB.loglar.filter(l=>{const d=DB.dokumanlar.find(x=>x.id===l.dokId);return d&&d.giz===g&&!l.ok;}).length;
+      const oran=toplamLog>0?Math.round(redLog/toplamLog*100):0;
+      return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span class="b" style="background:${GR(g)}18;color:${GR(g)};min-width:80px">${g} — ${GA(g)}</span>
+        <div style="flex:1;height:8px;background:var(--bd);border-radius:4px;overflow:hidden">
+          <div style="height:100%;width:${oran}%;background:${GR(g)};border-radius:4px"></div>
+        </div>
+        <span style="font-family:var(--m);font-size:11px;color:${GR(g)};min-width:35px">${oran}%</span>
+      </div>`;
+    }).join('')}
+    <div style="font-size:10px;color:var(--t4);margin-top:8px">Yüksek gizlilik = daha fazla red oranı</div>
+  </div>`;
+
+  // S19: Mesai dışı
+  const mesaiDisi=DB.loglar.filter(l=>{
+    const saat=parseInt((l.tarih.split(' ')[1]||'09:00').split(':')[0]);
+    return (saat>=18||saat<8)&&l.ok&&DB.dokumanlar.find(d=>d.id===l.dokId&&d.giz>=3);
+  });
+  document.getElementById('mesai-tbody').innerHTML=mesaiDisi.length===0?
+    `<tr><td colspan="7" class="empty">Mesai dışı yüksek gizlikli erişim tespit edilmedi</td></tr>`:
+    mesaiDisi.map(l=>{
+      const d=DB.dokumanlar.find(x=>x.id===l.dokId)||{no:'—',baslik:'—',giz:0};
+      return `<tr>
+        <td style="font-family:var(--m);font-size:10px">#${l.id}</td>
+        <td class="p" style="font-size:11px;font-family:var(--m)">${l.usr}</td>
+        <td style="font-size:11px;font-family:var(--m)">${d.no}</td>
+        <td>${islemBadge(l.islem)}</td>
+        <td><span class="b" style="background:${GR(d.giz)}18;color:${GR(d.giz)}">${d.giz}</span></td>
+        <td style="font-family:var(--m);font-size:11px">${l.tarih.split(' ')[1]||'—'}</td>
+        <td style="font-family:var(--m);font-size:11px">${l.tarih.split(' ')[0]||'—'}</td>
+      </tr>`;
+    }).join('');
+}
+
+function renderAyar(){
+  const tb=document.getElementById('ay-tbody');
+  if(!tb) return;
+  tb.innerHTML=DB.ayarlar.map(a=>`
+    <tr>
+      <td class="p" style="font-family:var(--m)">${a.anahtar}</td>
+      <td>
+        ${CR.sev>=10
+          ?`<input style="background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:4px 8px;color:var(--t1);font-family:var(--m);font-size:12px" value="${a.deger}" onchange="ayarGuncelle(${a.id},this.value)">`
+          :`<span class="b b-b" style="font-family:var(--m)">${a.deger}</span>`}
+      </td>
+      <td><span class="b ${a.tip==='Bool'?'b-p':'b-c'}">${a.tip}</span></td>
+      <td style="font-size:12px;color:var(--t2)">${a.ac}</td>
+      <td>
+        ${CR.sev>=10?`<button class="btn btn-s btn-acc" onclick="toast('Ayar kaydedildi','s')">Kaydet</button>`:'—'}
+      </td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CRUD İŞLEMLERİ
+// ══════════════════════════════════════════════════════════════════
+function dokGoruntule(id){
+  const d=DB.dokumanlar.find(x=>x.id===id);
+  if(!d) return;
+  if(!erisimVarMi(d,CR)){
+    ekleLog(id,'YetkiReddi',0);
+    toast('Erişim reddedildi — yetki yetersiz','e');
+    return;
+  }
+  ekleLog(id,'Goruntuleme',1);
+  toast(`"${d.baslik.slice(0,30)}" görüntüleniyor — erişim logu kaydedildi`,'i');
+}
+
+function dokDuzenle(id){
+  const d=DB.dokumanlar.find(x=>x.id===id);
+  if(!d||!CR.yaz){toast('Yazma yetkiniz yok','e');return;}
+  ekleLog(id,'Duzenleme',1);
+  toast(`"${d.baslik.slice(0,30)}" düzenleme modu — log kaydedildi`,'i');
+}
+
+function dokSil(id){
+  const d=DB.dokumanlar.find(x=>x.id===id);
+  if(!d||!CR.sil){toast('Silme yetkiniz yok','e');return;}
+  if(!confirm('Mantıksal silme: Doküman arşivlenecek. Onaylıyor musunuz?')) return;
+  d.durum='Arsivlendi';
+  ekleLog(id,'Silme',1);
+  toast(`${d.no} arşivlendi — log kaydedildi`,'s');
+  renderDok();
+  renderDashboard();
+}
+
+function dokKaydet(){
+  if(!CR.yaz){toast('Yazma yetkiniz yok','e');return;}
+  const bas=document.getElementById('m-bas').value.trim();
+  const no=document.getElementById('m-no').value.trim();
+  const kat=document.getElementById('m-kat').value;
+  const giz=parseInt(document.getElementById('m-giz').value);
+  const dur=document.getElementById('m-dur').value;
+  const etk=parseInt(document.getElementById('m-etk').value);
+  const ac=document.getElementById('m-ac').value.trim();
+  if(!bas||!no){toast('Başlık ve doküman no zorunlu','e');return;}
+  if(giz>CR.gizMax){toast(`Gizlilik ${giz}, yetkiniz ${CR.gizMax}. Azaltınız.`,'e');return;}
+  if(!CR.katlar.includes(kat)){toast('Bu kategoriye yazma yetkiniz yok','e');return;}
+  const yeni={id:Date.now(),no,baslik:bas,kat,giz,durum:dur,olusturan:CU.kadi,dept:CU.dept,tarih:new Date().toISOString().slice(0,10),versiyon:'1.0',etk:[etk],ac};
+  DB.dokumanlar.unshift(yeni);
+  DB.versiyonlar.push({id:Date.now()+1,dokId:yeni.id,no:'1.0',not:'İlk versiyon',olusturan:CU.kadi,tarih:new Date().toISOString().slice(0,10)});
+  DB.gecmis.unshift({id:Date.now()+2,usr:CU.kadi,kat:'DokumanIslemleri',ac:`Yeni doküman oluşturuldu: ${no}`,tablo:'Dokumanlar',sonuc:'Basarili',tarih:new Date().toLocaleString('tr-TR')});
+  kapat('mo-dok');
+  toast(`Doküman oluşturuldu: ${no} — versiyon 1.0`,'s');
+  renderDok();renderDashboard();renderVer();renderGecmis();
+  document.getElementById('m-bas').value='';document.getElementById('m-ac').value='';
+  const yil=new Date().getFullYear();
+  document.getElementById('m-no').value=`DOC-${yil}-${String(DB.dokumanlar.length+1).padStart(5,'0')}`;
+}
+
+function usrKaydet(){
+  if(CR.sev<9){toast('Kullanıcı ekleme yetkiniz yok','e');return;}
+  const ad=document.getElementById('u-ad').value.trim();
+  const sy=document.getElementById('u-sy').value.trim();
+  const kd=document.getElementById('u-kd').value.trim();
+  const em=document.getElementById('u-em').value.trim();
+  const dp=parseInt(document.getElementById('u-dp').value);
+  const rl=document.getElementById('u-rl').value;
+  const uv=document.getElementById('u-uv').value.trim();
+  if(!ad||!kd||!em){toast('Ad, kullanıcı adı ve e-posta zorunlu','e');return;}
+  if(DB.kullanicilar.find(u=>u.kadi===kd)){toast('Kullanıcı adı zaten kullanımda','e');return;}
+  DB.kullanicilar.push({id:Date.now(),kadi:kd,ad,soyad:sy,email:em,dept:dp,rol:rl,unvan:uv||DB.roller.find(r=>r.kod===rl)?.ad,aktif:1,sonGiris:null});
+  DB.gecmis.unshift({id:Date.now()+1,usr:CU.kadi,kat:'KullaniciIslemleri',ac:`Yeni kullanıcı eklendi: ${kd}`,tablo:'Kullanicilar',sonuc:'Basarili',tarih:new Date().toLocaleString('tr-TR')});
+  kapat('mo-user');
+  toast(`Kullanıcı oluşturuldu: ${kd}`,'s');
+  renderUsr();renderDashboard();renderGecmis();
+  ['u-ad','u-sy','u-kd','u-em','u-uv'].forEach(id=>document.getElementById(id).value='');
+}
+
+function usrToggle(id){
+  const u=DB.kullanicilar.find(x=>x.id===id);
+  if(!u||u.kadi===CU.kadi){toast('Kendi hesabınızı değiştiremezsiniz','e');return;}
+  u.aktif=u.aktif?0:1;
+  toast(`${u.kadi} ${u.aktif?'aktifleştirildi':'devre dışı bırakıldı'}`,'s');
+  renderUsr();
+}
+
+function onayKaydet(){
+  const dokId=parseInt(document.getElementById('o-dok').value);
+  const ony=document.getElementById('o-ony').value;
+  const adim=parseInt(document.getElementById('o-adm').value);
+  DB.onaylar.push({id:Date.now(),dokId,onaycı:ony,adim,durum:'Bekliyor',gonderilme:new Date().toISOString().slice(0,10),onayTarih:null,yorum:null});
+  DB.bildirimler.unshift({id:Date.now()+1,alici:ony,gonderen:CU.kadi,dokId,tip:'OnayBekliyor',baslik:'Onay Bekleniyor: '+DB.dokumanlar.find(d=>d.id===dokId)?.baslik?.slice(0,30),okundu:0,tarih:new Date().toLocaleString('tr-TR')});
+  kapat('mo-onay');
+  toast(`Onay akışı başlatıldı — onaycı: ${ony}`,'s');
+  renderOnay();renderBil();renderDashboard();
+}
+
+function onayVer(id){
+  const o=DB.onaylar.find(x=>x.id===id);
+  if(!o) return;
+  o.durum='Onaylandi';
+  o.onayTarih=new Date().toISOString().slice(0,10);
+  const d=DB.dokumanlar.find(x=>x.id===o.dokId);
+  if(d&&d.durum==='Inceleme') d.durum='Onaylandi';
+  DB.gecmis.unshift({id:Date.now(),usr:CU.kadi,kat:'DokumanIslemleri',ac:`Onay verildi: ${d?.no||'—'}`,tablo:'OnayAkislari',sonuc:'Basarili',tarih:new Date().toLocaleString('tr-TR')});
+  toast('Onay verildi — log kaydedildi','s');
+  renderOnay();renderDashboard();renderDok();
+}
+
+function onayReddet(id){
+  const o=DB.onaylar.find(x=>x.id===id);
+  if(!o) return;
+  o.durum='Reddedildi';
+  o.yorum='Reddedildi — revizyon gerekli';
+  toast('Onay reddedildi','w');
+  renderOnay();renderDashboard();
+}
+
+function paylaşimKaydet(){
+  if(!CR.pay){toast('Paylaşma yetkiniz yok','e');return;}
+  const dokId=parseInt(document.getElementById('py-dok').value);
+  const tip=document.getElementById('py-tip').value;
+  const yetki=document.getElementById('py-ytk').value;
+  const em=document.getElementById('py-em').value.trim();
+  DB.paylaşimlar.push({id:Date.now(),dokId,paylasan:CU.kadi,alici:null,email:em||null,tip,yetki,bitis:null,aktif:1,tarih:new Date().toISOString().slice(0,10)});
+  ekleLog(dokId,'Paylasma',1);
+  kapat('mo-paylasim');
+  toast('Doküman paylaşıldı — log kaydedildi','s');
+  renderPay();renderLog(DB.loglar);
+}
+
+function paylaşimIptal(id){
+  const p=DB.paylaşimlar.find(x=>x.id===id);
+  if(p) p.aktif=0;
+  toast('Paylaşım iptal edildi','w');
+  renderPay();
+}
+
+function istisnaKaydet(){
+  if(CR.sev<9){toast('İstisna ekleme yetkiniz yok','e');return;}
+  const usr=document.getElementById('is-usr').value;
+  const yon=document.getElementById('is-yon').value;
+  const katKod=document.getElementById('is-kat').value;
+  const ac=document.getElementById('is-ac').value.trim();
+  DB.istisnalar.push({id:Date.now(),usr,yon,katKod,dokId:null,ac:ac||'Manuel eklendi',veren:CU.kadi,baslangic:new Date().toISOString().slice(0,10),bitis:null,aktif:1});
+  kapat('mo-istisna');
+  toast(`Kişisel yetki istisnası eklendi: ${usr} — ${yon}`,'s');
+  renderIst();
+}
+
+function tumunuOku(){
+  DB.bildirimler.forEach(b=>b.okundu=1);
+  renderBil();renderDashboard();
+  toast('Tüm bildirimler okundu işaretlendi','s');
+}
+
+function ayarGuncelle(id,val){
+  const a=DB.ayarlar.find(x=>x.id===id);
+  if(a) a.deger=val;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// YETKİ KONTROLÜ (S08)
+// ══════════════════════════════════════════════════════════════════
+function yetkiKontrol(){
+  const kadi=document.getElementById('yk-usr').value;
+  const katKod=document.getElementById('yk-kat').value;
+  const islemKey=document.getElementById('yk-islem').value;
+  const u=DB.kullanicilar.find(x=>x.kadi===kadi);
+  const r=DB.roller.find(x=>x.kod===u?.rol)||CR;
+  const k=DB.kategoriler.find(x=>x.kod===katKod);
+  const kat=k?.giz||1;
+
+  const islemAd={ok:'Okuma',yaz:'Yazma',sil:'Silme',ind:'İndirme',pay:'Paylaşma'};
+  const yetkiVar=r[islemKey]===1;
+  const gizOk=r.gizMax>=kat;
+  const katOk=r.katlar.includes(katKod);
+  const aktifOk=u?.aktif===1;
+  const erisim=yetkiVar&&gizOk&&katOk&&aktifOk;
+
+  const sebep=[];
+  if(!aktifOk) sebep.push('Hesap aktif değil');
+  if(!katOk) sebep.push(`"${r.ad}" bu kategoriye erişemiyor`);
+  if(!gizOk) sebep.push(`Gizlilik çok yüksek: Belge=${kat}, Max=${r.gizMax}`);
+  if(!yetkiVar) sebep.push(`${islemAd[islemKey]} yetkisi yok`);
+
+  document.getElementById('yk-sonuc').innerHTML=`
+    <div class="ar ${erisim?'ar-ok':'ar-no'}">
+      <span style="font-size:22px">${erisim?'✓':'⊘'}</span>
+      <div>
+        <div>${erisim?'ERİŞİM VERİLDİ':'ERİŞİM REDDEDİLDİ'}</div>
+        <div style="font-size:11px;opacity:.8;margin-top:3px;font-family:var(--m)">${kadi} · ${r.ad} · ${k?.ad||katKod} · ${islemAd[islemKey]}</div>
+        ${!erisim?`<div style="font-size:11px;margin-top:5px;opacity:.9">${sebep.join(' | ')}</div>`:''}
+      </div>
+    </div>`;
+
+  const dokOrnek=DB.dokumanlar.find(d=>d.kat===katKod);
+  if(dokOrnek) ekleLog(dokOrnek.id,erisim?'Goruntuleme':'YetkiReddi',erisim?1:0);
+  sqlGuncelle(kadi,katKod,islemKey,erisim);
+}
+
+function sqlGuncelle(kadi='kullanici_001',katKod='KAL',islemKey='ok',sonuc){
+  document.getElementById('yk-sql').textContent=
+`-- S08: Erişim Kararı (CASE WHEN sorgusu)
+USE YetkiMatrisiDB;
+
+SELECT
+    k.KullaniciAdi,
+    k.Ad + N' ' + k.Soyad   AS TamAd,
+    d.Baslik                 AS DokumanBaslik,
+    d.GizlilikSeviyesi,
+    r.RolAdi,
+    r.YetkiSeviyesi,
+    ym.GizlilikMaxSeviyesi,
+    ym.OkumaYetkisi,
+    CASE
+        WHEN ym.OkumaYetkisi = 1
+         AND ym.GizlilikMaxSeviyesi >= d.GizlilikSeviyesi
+         AND k.AktifMi = 1
+        THEN N'ERİŞİM VERİLDİ'
+        ELSE N'ERİŞİM REDDEDİLDİ'
+    END AS ErisimKarari
+FROM Kullanicilar k
+JOIN KullaniciRol kr
+    ON kr.KullaniciID = k.KullaniciID AND kr.AktifMi = 1
+JOIN Roller r
+    ON r.RolID = kr.RolID
+JOIN YetkiMatrisi ym
+    ON ym.RolID = r.RolID AND ym.AktifMi = 1
+CROSS JOIN (
+    SELECT TOP 1 * FROM Dokumanlar
+    WHERE TipID IN (
+        SELECT TipID FROM DokumanTipleri
+        WHERE KategoriID = (
+            SELECT KategoriID FROM DokumanKategorileri
+            WHERE KategoriKodu = '${katKod}'
+        )
+    )
+) d
+WHERE k.KullaniciAdi = '${kadi}';
+${sonuc!==undefined?`\n-- SONUÇ: ${sonuc?'ERİŞİM VERİLDİ ✓':'ERİŞİM REDDEDİLDİ ⊘'}`:''}`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOG YARDIMCILARI
+// ══════════════════════════════════════════════════════════════════
+function ekleLog(dokId,islem,ok){
+  const l={id:1000+DB.loglar.length+1,usr:CU.kadi,dokId,islem,ip:'192.168.1.'+Math.floor(Math.random()*254+1),ses:'SES-'+(DB.loglar.length+1),ok,tarih:new Date().toLocaleString('tr-TR')};
+  DB.loglar.unshift(l);
+  document.getElementById('log-canli').textContent='CANLI · '+DB.loglar.filter(x=>!x.ok).length+' red';
+  renderLog(DB.loglar);
+  renderDashboard();
+  renderSuphe();
+}
+
+function logFiltre(islem){renderLog(islem?DB.loglar.filter(l=>l.islem===islem):DB.loglar);}
+function logFiltreSonuc(v){renderLog(v===''?DB.loglar:DB.loglar.filter(l=>String(l.ok)===v));}
+
+function testLog(){
+  const islemler=['Goruntuleme','Indirme','Duzenleme','YetkiReddi','Paylasma'];
+  const dok=DB.dokumanlar[Math.floor(Math.random()*DB.dokumanlar.length)];
+  const islem=islemler[Math.floor(Math.random()*islemler.length)];
+  ekleLog(dok.id,islem,islem!=='YetkiReddi'?1:0);
+  toast(`Test log eklendi: ${islem}`,'i');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UI YARDIMCILARI
+// ══════════════════════════════════════════════════════════════════
+function sayfa(id){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.remove('on'));
+  document.getElementById('pg-'+id)?.classList.add('on');
+  document.getElementById('m-'+id)?.classList.add('on');
+  const adlar={dashboard:'Dashboard',dokumanlar:'Dokümanlar',versiyonlar:'Versiyonlar',
+    onaylar:'Onay Akışları',bildirimler:'Bildirimler',paylaşimlar:'Paylaşımlar',
+    kategoriler:'Kategoriler',etiketler:'Etiketler (1NF)',
+    kullanicilar:'Kullanıcı Yönetimi',roller:'Roller & Yetkiler',departmanlar:'Departmanlar',
+    istisnalar:'Kişisel Yetki İstisnaları',ayarlar:'Sistem Ayarları',
+    loglar:'Erişim Logları',gecmis:'İşlem Geçmişi',suphe:'Şüpheli Erişim',
+    yetki:'Yetki Kontrolü',raporlar:'Analitik Raporlar',norm:'Normalizasyon'};
+  document.getElementById('tp-page').textContent=adlar[id]||id;
+}
+
+function ac(id){document.getElementById(id).classList.add('on')}
+function kapat(id){document.getElementById(id).classList.remove('on')}
+
+document.querySelectorAll('.mo').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m) m.classList.remove('on');});
+});
+
+function toast(msg,t='i'){
+  const el=document.createElement('div');
+  el.className=`ti ti-${t}`;
+  el.textContent=msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.remove(),3500);
+}
+
+// Enter ile giriş
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter') girisYap();});
+document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter') girisYap();});
+
+// Yetki kontrol select değişince SQL güncelle
+['yk-usr','yk-kat','yk-islem'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>sqlGuncelle(
+    document.getElementById('yk-usr').value,
+    document.getElementById('yk-kat').value,
+    document.getElementById('yk-islem').value
+  ));
+});
+</script>
+</body>
+</html>
